@@ -139,10 +139,11 @@ public class RegisterActivity extends AppCompatActivity {
                                             Uri downloadUri = task.getResult();
                                             String imageUrl = downloadUri.toString();
                                             User userModel = new User();
-                                            userModel.userNickname = userNickName;
-                                            userModel.profileImageUrl = imageUrl;
-                                            userModel.uid = currentUserID;
-                                            userModel.gender = strGender;
+                                            userModel.setUserNickname(userNickName);
+                                            userModel.setUserEmail(userEmail);
+                                            userModel.setProfileImageUrl(imageUrl);
+                                            userModel.setUid(currentUserID);
+                                            userModel.setGender(strGender);
                                             FirebaseDatabase.getInstance().getReference().child("users").child(currentUserID).setValue(userModel).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
                                                 public void onSuccess(Void aVoid) {
@@ -155,8 +156,8 @@ public class RegisterActivity extends AppCompatActivity {
                                         }
                                     }
                                 });
-                                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                                startActivity(intent);
+//                                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+//                                startActivity(intent);
                             } else {
                                 String message = task.getException().toString();
                                 Toast.makeText(RegisterActivity.this, "Error : " + message, Toast.LENGTH_SHORT).show();
