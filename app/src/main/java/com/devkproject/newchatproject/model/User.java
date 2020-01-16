@@ -6,6 +6,7 @@ public class User {
     private String profileImageUrl;
     private String uid;
     private String gender;
+    private boolean selection;
 
     public String getUserNickname() {
         return userNickname;
@@ -45,5 +46,12 @@ public class User {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+    public boolean isSelection() {
+        return selection;
+    }
+
+    public void setSelection(boolean selection) {
+        this.selection = selection;
     }
 }

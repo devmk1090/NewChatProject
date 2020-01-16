@@ -6,6 +6,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,9 +18,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.devkproject.newchatproject.R;
+import com.devkproject.newchatproject.adapters.FriendsListAdapter;
 import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,6 +42,9 @@ public class FriendsFragment extends Fragment {
     private DatabaseReference userRef;
     private DatabaseReference friendsRef;
 
+    private RecyclerView recyclerView;
+    private FriendsListAdapter friendsListAdapter;
+
     public FriendsFragment() {}
 
 
@@ -48,6 +55,7 @@ public class FriendsFragment extends Fragment {
 
         search_friends_editText = (EditText) friendsView.findViewById(R.id.friends_search_editText);
         search_button = (Button) friendsView.findViewById(R.id.friends_search_button);
+        recyclerView = (RecyclerView) friendsView.findViewById(R.id.friends_recyclerView);
 
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
@@ -63,8 +71,15 @@ public class FriendsFragment extends Fragment {
                 searchFriends();
             }
         });
+
+        addFriendListener();
+        friendsListAdapter = new FriendsListAdapter(getContext());
+        recyclerView.setAdapter(friendsListAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
         return friendsView;
     }
+
     public void searchFriends() {
 
         final String inputEmail = search_friends_editText.getText().toString();
@@ -148,6 +163,47 @@ public class FriendsFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
+    }
+
+    private void addFriendListener() {
+
+        friendsRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                // User 모델과 friend 는 구조가 동일하기 때문에 User 모델로 가져온다
+                User friend = dataSnapshot.getValue(User.class);
+                drawUI(friend);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+    private void drawUI(User friend) {
+        friendsListAdapter.addItem(friend);
+    }
+
+    //현재의 모드가 SELECTION_MODE 라면 UNSEL 일때와 SEL 일때의 작동이 다르게 하기 위한 코드
+    public void toggleSelectionMode() {
+        friendsListAdapter.setSelectionMode(friendsListAdapter.getSelectionMode() == FriendsListAdapter.SELECTION_MODE ? friendsListAdapter.UNSELECTION_MODE :
+                FriendsListAdapter.SELECTION_MODE);
     }
 
 }

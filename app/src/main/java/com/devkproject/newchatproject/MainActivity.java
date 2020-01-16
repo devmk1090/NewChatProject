@@ -72,6 +72,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.toolbar_search:
                 Toast.makeText(getApplicationContext(), "Search Click", Toast.LENGTH_SHORT).show();
                 return true;
+            case R.id.toolbar_multiChat:
+                friendFragment.toggleSelectionMode();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
