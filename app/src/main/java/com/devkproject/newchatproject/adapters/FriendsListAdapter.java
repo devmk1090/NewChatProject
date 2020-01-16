@@ -1,21 +1,15 @@
 package com.devkproject.newchatproject.adapters;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.devkproject.newchatproject.ChatActivity;
 import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,11 +33,9 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
 
-    private Context context;
 
-    public FriendsListAdapter(Context context) {
+    public FriendsListAdapter() {
         friendList = new ArrayList<>();
-        this.context = context;
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
         friendRef = FirebaseDatabase.getInstance().getReference("users").child(mUser.getUid()).child("friends");
@@ -55,7 +47,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
     public int getSelectionMode() {
         return this.selectionMode;
     }
-    public int getSelectonUserCount() {
+    public int getSelectionUserCount() {
         int selectedCount = 0;
         for (User user : friendList) {
             if(user.isSelection()) { // true 인 사람만
@@ -67,7 +59,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 
     // 선택된 유저들의 정보를 리턴
     public String [] getSelectedUids() {
-        String [] seletedUids = new String [getSelectonUserCount()];
+        String [] seletedUids = new String [getSelectionUserCount()];
         int i = 0;
         for (User user : friendList) {
             if(user.isSelection()) { // true 인 사람만
@@ -128,52 +120,6 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
             user_email = (TextView) itemView.findViewById(R.id.users_item_email);
             user_status = (TextView) itemView.findViewById(R.id.users_item_status);
             user_check = (CheckBox) itemView.findViewById(R.id.users_item_checkBox);
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(final View v) {
-                    final int position = getAdapterPosition();
-                    final User friend = getItem(position);
-                    if(getSelectionMode() == UNSELECTION_MODE) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(),3);
-                        builder.setTitle(friend.getUserNickname() + "님과 대화를 하시겠습니까 ?");
-                        builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent chatIntent = new Intent(v.getContext(), ChatActivity.class);
-                                chatIntent.putExtra("uid", friend.getUid());
-                                context.startActivity(chatIntent);
-                            }
-                        }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        });
-                        builder.show();
-                    } else {
-                        // selection 되어있다면 false, 안되어있으면 true
-                        friend.setSelection(friend.isSelection() ? false : true);
-                        int selectonUserCount = getSelectonUserCount();
-                        AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(),3);
-                        builder.setTitle(selectonUserCount + "명과 대화를 하시겠습니까 ?");
-                        builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent chatIntent = new Intent(v.getContext(), ChatActivity.class);
-                                chatIntent.putExtra("uids", getSelectedUids());
-                                context.startActivity(chatIntent);
-                            }
-                        }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        });
-                        builder.show();
-                    }
-                }
-            });
         }
     }
 }

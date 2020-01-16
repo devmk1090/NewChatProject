@@ -1,6 +1,9 @@
 package com.devkproject.newchatproject.fragment;
 
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,8 +20,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.devkproject.newchatproject.ChatActivity;
 import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.adapters.FriendsListAdapter;
+import com.devkproject.newchatproject.customviews.RecyclerViewItemClickListener;
 import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,6 +41,10 @@ public class FriendsFragment extends Fragment {
     private static final String TAG = "FriendsFragment";
     private EditText search_friends_editText;
     private Button search_button;
+
+    public static final int UNSELECTION_MODE = 1;
+    public static final int SELECTION_MODE = 2;
+    private int selectionMode = UNSELECTION_MODE;
 
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
@@ -73,9 +82,54 @@ public class FriendsFragment extends Fragment {
         });
 
         addFriendListener();
-        friendsListAdapter = new FriendsListAdapter(getContext());
+        friendsListAdapter = new FriendsListAdapter();
         recyclerView.setAdapter(friendsListAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.addOnItemTouchListener(new RecyclerViewItemClickListener(getContext(), new RecyclerViewItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                final User friend = friendsListAdapter.getItem(position);
+
+                if(friendsListAdapter.getSelectionMode() == FriendsListAdapter.UNSELECTION_MODE) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),3);
+                    builder.setTitle(friend.getUserNickname() + "님과 대화를 하시겠습니까 ?");
+                    builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
+                            chatIntent.putExtra("uid", friend.getUid());
+                            startActivity(chatIntent);
+                        }
+                    }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    builder.show();
+                } else {
+                    // selection 되어있다면 false, 안되어있으면 true
+                    friend.setSelection(friend.isSelection() ? false : true);
+                    int selectionUserCount = friendsListAdapter.getSelectionUserCount();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),3);
+                    builder.setTitle(selectionUserCount + "명과 대화를 하시겠습니까 ?");
+                    builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
+                            chatIntent.putExtra("uids", friendsListAdapter.getSelectedUids());
+                            startActivity(chatIntent);
+                        }
+                    }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    builder.show();
+                }
+            }
+        }));
 
         return friendsView;
     }
