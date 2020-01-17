@@ -1,12 +1,20 @@
 package com.devkproject.newchatproject.model;
 
 public class User {
-    private String userNickname;
-    private String userEmail;
-    private String profileImageUrl;
     private String uid;
+    private String userEmail;
+    private String userNickname;
+    private String profileImageUrl;
     private String gender;
     private boolean selection;
+
+    public User(String uid, String userEmail, String userNickname, String profileImageUrl, String gender) {
+        this.uid = uid;
+        this.userEmail = userEmail;
+        this.userNickname = userNickname;
+        this.profileImageUrl = profileImageUrl;
+        this.gender = gender;
+    }
 
     public String getUserNickname() {
         return userNickname;

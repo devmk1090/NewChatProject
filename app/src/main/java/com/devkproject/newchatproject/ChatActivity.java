@@ -3,18 +3,24 @@ package com.devkproject.newchatproject;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import com.devkproject.newchatproject.adapters.MessageListAdapter;
 import com.devkproject.newchatproject.model.Chat;
 import com.devkproject.newchatproject.model.Message;
 import com.devkproject.newchatproject.model.TextMessage;
 import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,6 +38,7 @@ public class ChatActivity extends AppCompatActivity {
     private String mChatID;
     private EditText chat_message;
     private ImageButton chat_camera, chat_send;
+    private Toolbar mToolbar;
 
     private FirebaseDatabase mFirebaseDB;
     private DatabaseReference mChatRef;
@@ -39,6 +46,9 @@ public class ChatActivity extends AppCompatActivity {
     private DatabaseReference mChatMessageRef;
     private DatabaseReference mUserRef;
     private FirebaseUser mCurrentUser;
+
+    private RecyclerView recyclerView;
+    private MessageListAdapter messageListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,17 +58,46 @@ public class ChatActivity extends AppCompatActivity {
         chat_message = (EditText) findViewById(R.id.chat_message_editText);
         chat_camera = (ImageButton) findViewById(R.id.chat_camera_button);
         chat_send = (ImageButton) findViewById(R.id.chat_send_button);
+        mToolbar = (Toolbar) findViewById(R.id.chat_room_toolbar);
+        recyclerView= (RecyclerView) findViewById(R.id.chat_recyclerView);
+
         mFirebaseDB = FirebaseDatabase.getInstance();
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         mUserRef = mFirebaseDB.getReference("users");
-
         mChatID = getIntent().getStringExtra("chat_id");
 
+        setSupportActionBar(mToolbar);
+        mToolbar.setTitleTextColor(Color.WHITE);
+
+        if(mChatID != null) {
+            mChatRef = mFirebaseDB.getReference("users").child(mCurrentUser.getUid()).child("chats").child(mChatID);
+            mChatMessageRef = mFirebaseDB.getReference("chat_messages").child(mChatID);
+            mChatRef.child("title").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    String title = dataSnapshot.getValue(String.class);
+                    mToolbar.setTitle(title);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+            initTotalUnreadCount();
+        }
+        else {
+            mChatRef = mFirebaseDB.getReference("users").child(mCurrentUser.getUid()).child("chats");
+        }
         // 0. 방 정보 설정 <-- 기존 방이어야 가능함.
         // 1. 대화 상대에 내가 선택한 사람 추가
         // 2. 각 상대별 chats 에 방추가
         // 3. 메세지 정보 중 읽은 사람에 내 정보를 추가
         // 4. 첫 메세지 전송
+
+        messageListAdapter = new MessageListAdapter();
+        recyclerView.setAdapter(messageListAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         chat_send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,6 +107,60 @@ public class ChatActivity extends AppCompatActivity {
         });
 
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        removeMessageListener();
+    }
+    private void removeMessageListener() {
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(mChatID != null) {
+            addMessageListener();
+        }
+    }
+    private void addMessageListener() {
+        mChatMessageRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                // 신규메세지
+                Message item = dataSnapshot.getValue(Message.class);
+                messageListAdapter.addItem(item);
+                // 읽음 처리 후 ui 처리
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                // 변경된 메세지 ex)unreadCount
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void initTotalUnreadCount() { // 메세지를 읽지않은 사용자가 방에 들어갈때 읽음으로 표시하기 위해 0 으로 초기화
+        mChatRef.child("totalUnreadCount").setValue(0);
+    }
+
     public void onSendEvent(View v) {
         if(mChatID != null) {
             sendMessage();
@@ -91,6 +184,7 @@ public class ChatActivity extends AppCompatActivity {
         textMessage.setChatID(mChatID);
         textMessage.setMessageID(messageID);
         textMessage.setMessageType(Message.MessageType.TEXT);
+
         textMessage.setReadUserList(Arrays.asList(new String[]{mCurrentUser.getUid()})); // 자기 자신은 읽었으므로
         String [] uids = getIntent().getStringArrayExtra("uids");
         if(uids != null) {
@@ -102,6 +196,7 @@ public class ChatActivity extends AppCompatActivity {
         mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+
                 // unreadCount 세팅하기 위한 상대방의 수를 가져옴.
                 long memberCount = dataSnapshot.getChildrenCount();
                 textMessage.setUnreadCount((int) (memberCount - 1));

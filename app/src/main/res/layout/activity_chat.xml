@@ -7,13 +7,16 @@
     android:background="@android:color/darker_gray"
     tools:context=".ChatActivity">
 
-<!--    <include-->
-<!--        android:id="@+id/chat_toolbar"-->
-<!--        layout="@layout/app_bar_layout">-->
-<!--    </include>-->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/chat_room_toolbar"
+        android:background="?attr/colorPrimary"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize">
+    </androidx.appcompat.widget.Toolbar>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chat_recyclerView"
+        android:layout_below="@+id/chat_room_toolbar"
         android:layout_above="@id/chat_relative_layout"
         android:layout_marginBottom="6dp"
         android:layout_width="match_parent"

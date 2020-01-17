@@ -7,7 +7,6 @@ public class TextMessage extends Message{
     public String getMessageText() {
         return messageText;
     }
-
     public void setMessageText(String messageText) {
         this.messageText = messageText;
     }
