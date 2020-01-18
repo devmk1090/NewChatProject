@@ -77,6 +77,7 @@ public class FriendsFragment extends Fragment {
                 Log.d(TAG, mUser.getDisplayName());
                 Log.d(TAG, mUser.getEmail());
                 Log.d(TAG, mUser.getUid());
+                Log.d(TAG, mUser.getPhotoUrl().toString());
                 searchFriends();
             }
         });

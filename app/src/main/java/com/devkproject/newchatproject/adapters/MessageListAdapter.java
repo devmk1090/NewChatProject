@@ -37,6 +37,24 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         messageList.add(item);
         notifyDataSetChanged();
     }
+    public void upadteItem (Message item) {
+        int position = getItemPosition(item.getMessageID());
+        if(position < 0) {
+            return;
+        }
+        messageList.set(position, item);
+        notifyItemChanged(position);
+    }
+    public int getItemPosition (String messageID) {
+        int position = 0;
+        for(Message message : messageList) {
+            if(message.getMessageID().equals(messageID)) {
+                return position;
+            }
+            position++;
+        }
+        return -1;
+    }
 
     public Message getItem(int position) {
         return messageList.get(position);
@@ -69,7 +87,6 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             //내가 보낸 메세지
             if(item.getMessageType() == Message.MessageType.TEXT) {
                 holder.sendTxt.setText(textMessage.getMessageText());
-
                 holder.sendTxt.setVisibility(View.VISIBLE);
                 holder.sendImage.setVisibility(View.GONE);
             }
@@ -82,6 +99,8 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             }
             if(item.getUnreadCount() > 0) {
                 holder.sendUnreadCount.setText(String.valueOf(item.getUnreadCount()));
+            } else {
+                holder.sendUnreadCount.setText("");
             }
             holder.sendDate.setText(messageDateFormat.format(item.getMessageDate()));
             holder.yourArea.setVisibility(View.GONE);
@@ -91,18 +110,19 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             // 상대방이 보낸 경우
             if (item.getMessageType() == Message.MessageType.TEXT) {
                 holder.rcvTxt.setText(textMessage.getMessageText());
-
                 holder.rcvTxt.setVisibility(View.VISIBLE);
                 holder.rcvImage.setVisibility(View.GONE);
             } else if (item.getMessageType() == Message.MessageType.PHOTO) {
                 Glide.with(holder.yourArea)
                         .load(photoMessage.getPhotoUrl())
                         .into(holder.rcvImage);
-                holder.sendTxt.setVisibility(View.GONE);
-                holder.sendImage.setVisibility(View.VISIBLE);
+                holder.rcvTxt.setVisibility(View.GONE);
+                holder.rcvImage.setVisibility(View.VISIBLE);
             }
             if(item.getUnreadCount() > 0) {
                 holder.rcvUnreadCount.setText(String.valueOf(item.getUnreadCount()));
+            } else {
+                holder.rcvUnreadCount.setText("");
             }
             if(item.getMessageUser().getProfileImageUrl() != null) {
                 Glide.with(holder.yourArea)

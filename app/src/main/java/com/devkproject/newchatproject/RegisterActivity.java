@@ -119,7 +119,8 @@ public class RegisterActivity extends AppCompatActivity {
                                 final String currentUserID = mAuth.getCurrentUser().getUid();
                                 // 회원가입할때 정보담기
                                 // DisplayName 을 userNickName 에서 받은 정보로 바꿔준다
-                                UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(userNickName).build();
+                                UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(userNickName)
+                                        .setPhotoUri(imageUri).build();
                                 task.getResult().getUser().updateProfile(userProfileChangeRequest);
 
                                 final StorageReference filePath = userProfileImagesRef.child(currentUserID + ".jpg");
