@@ -25,6 +25,7 @@ import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.adapters.FriendsListAdapter;
 import com.devkproject.newchatproject.customviews.RecyclerViewItemClickListener;
 import com.devkproject.newchatproject.model.User;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -50,6 +51,8 @@ public class FriendsFragment extends Fragment {
     private FirebaseUser mUser;
     private DatabaseReference userRef;
     private DatabaseReference friendsRef;
+    private FirebaseAnalytics mFirebaseAnalytics;
+
 
     private RecyclerView recyclerView;
     private FriendsListAdapter friendsListAdapter;
@@ -68,16 +71,13 @@ public class FriendsFragment extends Fragment {
 
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
         friendsRef = FirebaseDatabase.getInstance().getReference("users").child(mUser.getUid()).child("friends");
         userRef = FirebaseDatabase.getInstance().getReference("users");
 
         search_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, mUser.getDisplayName());
-                Log.d(TAG, mUser.getEmail());
-                Log.d(TAG, mUser.getUid());
-                Log.d(TAG, mUser.getPhotoUrl().toString());
                 searchFriends();
             }
         });
@@ -190,6 +190,12 @@ public class FriendsFragment extends Fragment {
                                                 User user = dataSnapshot.getValue(User.class);
                                                 userRef.child(currentUser.getUid()).child("friends").push().setValue(user);
                                                 Toast.makeText(getActivity(), "친구등록이 완료되었습니다", Toast.LENGTH_SHORT).show();
+
+                                                // Analytics 에 친구 추가 등록 알림
+                                                Bundle bundle = new Bundle();
+                                                bundle.putString("me", mUser.getEmail());
+                                                bundle.putString("friend", currentUser.getUserEmail());
+                                                mFirebaseAnalytics.logEvent("addFriend", bundle);
                                             }
 
                                             @Override

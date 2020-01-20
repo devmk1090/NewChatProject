@@ -45,6 +45,11 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         messageList.set(position, item);
         notifyItemChanged(position);
     }
+
+    public void clearItem() {
+        messageList.clear();
+    }
+
     public int getItemPosition (String messageID) {
         int position = 0;
         for(Message message : messageList) {

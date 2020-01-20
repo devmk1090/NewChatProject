@@ -118,10 +118,6 @@ public class RegisterActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 final String currentUserID = mAuth.getCurrentUser().getUid();
                                 // 회원가입할때 정보담기
-                                // DisplayName 을 userNickName 에서 받은 정보로 바꿔준다
-                                UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(userNickName)
-                                        .setPhotoUri(imageUri).build();
-                                task.getResult().getUser().updateProfile(userProfileChangeRequest);
 
                                 final StorageReference filePath = userProfileImagesRef.child(currentUserID + ".jpg");
                                 UploadTask uploadTask = filePath.putFile(imageUri);
@@ -145,6 +141,11 @@ public class RegisterActivity extends AppCompatActivity {
                                             userModel.setProfileImageUrl(imageUrl);
                                             userModel.setUid(currentUserID);
                                             userModel.setGender(strGender);
+
+                                            UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(userNickName)
+                                                    .setPhotoUri(Uri.parse(imageUrl)).build();
+                                            FirebaseAuth.getInstance().getCurrentUser().updateProfile(userProfileChangeRequest);
+
                                             FirebaseDatabase.getInstance().getReference().child("users").child(currentUserID).setValue(userModel).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
                                                 public void onSuccess(Void aVoid) {
