@@ -29,6 +29,10 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DatabaseReference UsersRef;
 
+    // 로컬 캐시 기능 조심히 써야함.
+//    static {
+//        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+//    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -20,10 +20,11 @@
             android:maxWidth="230dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:background="@drawable/rightbubble"
+            android:background="@drawable/left_bubble"
             android:id="@+id/rcvTxt"
-            android:padding="7dp"
+            android:padding="13dp"
             android:textColor="#000"
+            android:text="받는 사람"
             android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:textSize="15dp"
@@ -33,7 +34,6 @@
             android:maxHeight="230dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:background="@drawable/rightbubble"
             android:id="@+id/rcvImage"
             android:padding="3dp"
             android:scaleType="fitCenter"
@@ -82,7 +82,6 @@
             android:layout_width="match_parent"
             android:textSize="15dp"
             android:layout_height="wrap_content"/>
-
     </LinearLayout>
 
     <!-- 내가 쓴 글-->
@@ -118,10 +117,11 @@
             android:maxWidth="250dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:background="@drawable/leftbubble"
+            android:background="@drawable/right_bubble"
             android:id="@+id/sendTxt"
-            android:padding="7dp"
-            android:textColor="#fff"
+            android:padding="13dp"
+            android:textColor="#000000"
+            android:text="보내는 사람"
             android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:textSize="15dp"
@@ -132,11 +132,9 @@
             android:visibility="gone"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:background="@drawable/leftbubble"
             android:id="@+id/sendImage"
             android:padding="3dp"
             android:scaleType="fitCenter"
-            android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>

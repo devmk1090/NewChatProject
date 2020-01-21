@@ -105,10 +105,12 @@ public class ChatFragment extends Fragment {
 
                 drawUI(chatDataSnapshot, DrawType.UPDATE);
                 Chat updatedChat = chatDataSnapshot.getValue(Chat.class);
-                Chat oldChat = chatListAdapter.getItem(updatedChat.getChatID());
 
                 // totalUnread 의 변경, title 의 변경, lastMessage 변경시에 호출됨
                 if (updatedChat.getLastMessage() != null) {
+                    if(updatedChat.getLastMessage().getMessageType() == Message.MessageType.EXIT) {
+                        return;
+                    }
                     if (!updatedChat.getLastMessage().getMessageUser().getUid().equals(mCurrentUser.getUid())) {
                         if (!updatedChat.getChatID().equals(JOINED_ROOM)) {
                             // notification code
@@ -177,7 +179,7 @@ public class ChatFragment extends Fragment {
                     if ( !mCurrentUser.getUid().equals(member.getUid())) {
                         memberStringBuffer.append(member.getUserNickname());
                         if ( memberCount - loopCount > 1 ) {
-                            memberStringBuffer.append("  ");
+                            memberStringBuffer.append(", ");
                         }
                     }
                     if ( loopCount == memberCount ) {
@@ -206,8 +208,7 @@ public class ChatFragment extends Fragment {
     }
 
     public void leaveChat(final Chat chat) {
-
-        mChatMessageRef = mChatMessageRef.child(chat.getChatID());
+        final DatabaseReference messageRef = mFirebaseDatabase.getReference("chat_messages").child(chat.getChatID());
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), 3);
         builder.setTitle("선택된 대화방을 나가시겠습니까?")
                 .setPositiveButton("예", new DialogInterface.OnClickListener() {
@@ -222,12 +223,18 @@ public class ChatFragment extends Fragment {
 
                                 //  (나가기 메세지) chat_messages > {chat_id} > {message_id} > {exit 메세지} 발송
                                 final ExitMessage exitMessage = new ExitMessage();
+                                String messageID = messageRef.push().getKey();
+
                                 exitMessage.setMessageUser(new User(mCurrentUser.getUid(), mCurrentUser.getEmail(), mCurrentUser.getDisplayName(), mCurrentUser.getPhotoUrl().toString()));
                                 exitMessage.setMessageDate(new Date());
+                                exitMessage.setMessageID(messageID);
                                 exitMessage.setChatID(chat.getChatID());
-                                mChatMessageRef.push().setValue(exitMessage);
+                                messageRef.child(messageID).setValue(exitMessage);
 
-                                mChatMemberRef.child(chat.getChatID()).child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+                                mChatMemberRef
+                                        .child(chat.getChatID())
+                                        .child(mCurrentUser.getUid())
+                                        .removeValue(new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                                         // messages > {chat_id} unreadCount 에서 제거
@@ -240,14 +247,21 @@ public class ChatFragment extends Fragment {
                                         mFirebaseAnalytics.logEvent("leaveChat", bundle);
 
                                         // (나가기 메세지) 채팅방의 멤버정보, 방정보를 각각 가져오고 라스트 메세지 수정
-                                        mChatMemberRef.child(chat.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        mChatMemberRef
+                                                .child(chat.getChatID())
+                                                .addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                 Iterator<DataSnapshot> chatMemberIterator = dataSnapshot.getChildren().iterator();
                                                 while(chatMemberIterator.hasNext()) {
                                                     User chatMember = chatMemberIterator.next().getValue(User.class);
-                                                    mChatMemberRef.child(chatMember.getUid()).child(chat.getChatID()).child("lastMessage").setValue(exitMessage);
-
+                                                    mFirebaseDatabase
+                                                            .getReference("users")
+                                                            .child(chatMember.getUid())
+                                                            .child("chats")
+                                                            .child(chat.getChatID())
+                                                            .child("lastMessage")
+                                                            .setValue(exitMessage);
                                                 }
                                             }
 
@@ -271,11 +285,8 @@ public class ChatFragment extends Fragment {
                                                     }
                                                 }
                                             }
-
                                             @Override
-                                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                            }
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {}
                                         });
                                     }
                                 });
@@ -289,8 +300,12 @@ public class ChatFragment extends Fragment {
                                             // 방 참여자의 uid 정보를 가져오기 위해 정보 조회
                                             User chatMember = memberIterator.next().getValue(User.class);
                                             // 해당 참여자의 방 정보 업데이트를 위하여 방이름을 임의로 업데이트 진행
-                                            mFirebaseDatabase.getReference("users").child(chatMember.getUid()).child("chats")
-                                                    .child(chat.getChatID()).child("title").setValue("");
+                                            mFirebaseDatabase.getReference("users")
+                                                    .child(chatMember.getUid())
+                                                    .child("chats")
+                                                    .child(chat.getChatID())
+                                                    .child("title")
+                                                    .setValue("");
                                         }
                                     }
 

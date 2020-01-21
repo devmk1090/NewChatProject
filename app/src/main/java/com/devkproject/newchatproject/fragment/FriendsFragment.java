@@ -99,7 +99,7 @@ public class FriendsFragment extends Fragment {
                         public void onClick(DialogInterface dialog, int which) {
                             Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
                             chatIntent.putExtra("uid", friend.getUid());
-                            startActivity(chatIntent);
+                            startActivityForResult(chatIntent, ChatFragment.JOIN_ROOM_REQUEST_CODE);
                         }
                     }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
                         @Override
@@ -119,7 +119,7 @@ public class FriendsFragment extends Fragment {
                         public void onClick(DialogInterface dialog, int which) {
                             Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
                             chatIntent.putExtra("uids", friendsListAdapter.getSelectedUids());
-                            startActivity(chatIntent);
+                            startActivityForResult(chatIntent, ChatFragment.JOIN_ROOM_REQUEST_CODE);
                         }
                     }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
                         @Override

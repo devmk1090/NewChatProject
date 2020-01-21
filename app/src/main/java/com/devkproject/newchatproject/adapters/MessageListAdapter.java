@@ -37,7 +37,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         messageList.add(item);
         notifyDataSetChanged();
     }
-    public void upadteItem (Message item) {
+    public void updateItem (Message item) {
         int position = getItemPosition(item.getMessageID());
         if(position < 0) {
             return;
@@ -110,6 +110,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             holder.sendDate.setText(messageDateFormat.format(item.getMessageDate()));
             holder.yourArea.setVisibility(View.GONE);
             holder.sendArea.setVisibility(View.VISIBLE);
+            holder.exitArea.setVisibility(View.GONE);
         }
         else {
             // 상대방이 보낸 경우
@@ -123,6 +124,8 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                         .into(holder.rcvImage);
                 holder.rcvTxt.setVisibility(View.GONE);
                 holder.rcvImage.setVisibility(View.VISIBLE);
+            } else if (item.getMessageType() == Message.MessageType.EXIT) {
+                holder.exitTxt.setText(item.getMessageUser().getUserNickname() + "님이 방에서 나가셨습니다");
             }
             if(item.getUnreadCount() > 0) {
                 holder.rcvUnreadCount.setText(String.valueOf(item.getUnreadCount()));
@@ -134,9 +137,15 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                         .load(item.getMessageUser().getProfileImageUrl())
                         .into(holder.rcvProfileImage);
             }
-            holder.rcvDate.setText(messageDateFormat.format(item.getMessageDate()));
-            holder.yourArea.setVisibility(View.VISIBLE);
-            holder.sendArea.setVisibility(View.GONE);
+            if(item.getMessageType() == Message.MessageType.EXIT) {
+                holder.exitArea.setVisibility(View.VISIBLE);
+                holder.yourArea.setVisibility(View.GONE);
+                holder.sendArea.setVisibility(View.GONE);
+            } else {
+                holder.rcvDate.setText(messageDateFormat.format(item.getMessageDate()));
+                holder.yourArea.setVisibility(View.VISIBLE);
+                holder.sendArea.setVisibility(View.GONE);
+            }
         }
     }
 

@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +16,7 @@ import com.devkproject.newchatproject.fragment.ChatFragment;
 import com.devkproject.newchatproject.fragment.FriendsFragment;
 import com.devkproject.newchatproject.fragment.SetFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private FriendsFragment friendFragment = new FriendsFragment();
     private ChatFragment chatFragment = new ChatFragment();
     private SetFragment setFragment = new SetFragment();
+    private FirebaseAuth mAuth;
 
 
     @Override
@@ -30,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mAuth = FirebaseAuth.getInstance();
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.app_name);
@@ -75,7 +79,16 @@ public class MainActivity extends AppCompatActivity {
             case R.id.toolbar_multiChat:
                 friendFragment.toggleSelectionMode();
                 return true;
+            case R.id.toolbar_logOut:
+                mAuth.signOut();
+                SendUserToLoginActivity();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    private void SendUserToLoginActivity() {
+        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+        loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(loginIntent);
     }
 }

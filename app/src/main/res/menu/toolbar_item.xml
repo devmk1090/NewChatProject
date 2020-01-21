@@ -2,8 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/toolbar_search"
-        android:title="검색"/>
+        android:title="친구 추가"/>
     <item
         android:id="@+id/toolbar_multiChat"
         android:title="다중 대화"/>
+    <item
+        android:id="@+id/toolbar_logOut"
+        android:title="로그 아웃"/>
 </menu>

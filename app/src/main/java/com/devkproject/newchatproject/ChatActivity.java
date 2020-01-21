@@ -45,6 +45,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -234,7 +236,14 @@ public class ChatActivity extends AppCompatActivity {
 
                         @Override
                         public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
-                            initTotalUnreadCount();
+                            // 읽는 순간 0 으로 초기화.
+                            // Timer, TimeTask 를 이용하여 0.5초 딜레이를 준다
+                            new Timer().schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    initTotalUnreadCount();
+                                }
+                            }, 500);
                         }
                     });
                 }
@@ -243,10 +252,11 @@ public class ChatActivity extends AppCompatActivity {
             if(item.getMessageType() == Message.MessageType.TEXT) {
                 TextMessage textMessage = dataSnapshot.getValue(TextMessage.class);
                 messageListAdapter.addItem(textMessage);
-            }
-            else if (item.getMessageType() == Message.MessageType.PHOTO) {
+            } else if (item.getMessageType() == Message.MessageType.PHOTO) {
                 PhotoMessage photoMessage = dataSnapshot.getValue(PhotoMessage.class);
                 messageListAdapter.addItem(photoMessage);
+            } else if (item.getMessageType() == Message.MessageType.EXIT) {
+                messageListAdapter.addItem(item);
             }
             if(callCount >= totalMessageCount) {
                 // 스크롤을 맨 마지막으로 내린다
@@ -262,11 +272,11 @@ public class ChatActivity extends AppCompatActivity {
             Message item = dataSnapshot.getValue(Message.class);
             if(item.getMessageType() == Message.MessageType.TEXT) {
                 TextMessage textMessage = dataSnapshot.getValue(TextMessage.class);
-                messageListAdapter.upadteItem(textMessage);
+                messageListAdapter.updateItem(textMessage);
             }
             else if (item.getMessageType() == Message.MessageType.PHOTO) {
                 PhotoMessage photoMessage = dataSnapshot.getValue(PhotoMessage.class);
-                messageListAdapter.upadteItem(photoMessage);
+                messageListAdapter.updateItem(photoMessage);
             }
         }
         @Override
@@ -386,18 +396,30 @@ public class ChatActivity extends AppCompatActivity {
                         while(memberIterator.hasNext()) {
                             // 대화 상대 한명한명 돌면서 정보를 읽는다
                             User chatMember = memberIterator.next().getValue(User.class);
-                            mUserRef.child(chatMember.getUid()).child("chats").child(mChatID).child("lastMessage").setValue(message);
+                            mUserRef
+                                    .child(chatMember.getUid())
+                                    .child("chats")
+                                    .child(mChatID)
+                                    .child("lastMessage")
+                                    .setValue(message);
                             if(!chatMember.getUid().equals(mCurrentUser.getUid())) {
-                                mUserRef.child(chatMember.getUid()).child("chats").child(mChatID).child("totalUnreadCount")
-                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                mUserRef  // 공유되는 증가카운트는 transaction 을 이용하여 처리하자
+                                        .child(chatMember.getUid())
+                                        .child("chats")
+                                        .child(mChatID)
+                                        .child("totalUnreadCount")
+                                        .runTransaction(new Transaction.Handler() {
+                                            @NonNull
                                             @Override
-                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                long totalUnreadCount = dataSnapshot.getValue(long.class);
-                                                dataSnapshot.getRef().setValue(totalUnreadCount + 1);
+                                            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                                                // 삼항연산자 : 값이 null 일때 true > 0 , false > mutableData.getValue(long.class) 를 넣어준다
+                                                long totalUnreadCount = mutableData.getValue(long.class) == null ? 0 : mutableData.getValue(long.class);
+                                                mutableData.setValue(totalUnreadCount + 1);
+                                                return Transaction.success(mutableData);
                                             }
 
                                             @Override
-                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
 
                                             }
                                         });

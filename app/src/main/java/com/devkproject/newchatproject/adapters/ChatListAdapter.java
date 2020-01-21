@@ -87,8 +87,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatHo
         if(item.getLastMessage() != null) {
             if(item.getLastMessage().getMessageType() == Message.MessageType.TEXT) {
                 holder.lastMessage.setText(item.getLastMessage().getMessageText());
-            } else {
+            } else if (item.getLastMessage().getMessageType() == Message.MessageType.PHOTO){
                 holder.lastMessage.setText("(사진)");
+            } else if (item.getLastMessage().getMessageType() == Message.MessageType.EXIT) {
+                holder.lastMessage.setText(String.format("%s님이 방에서 나가셨습니다.", item.getLastMessage().getMessageUser().getUserNickname()));
             }
             holder.lastMsgDate.setText(sdf.format(item.getCreateDate()));
         }
@@ -105,7 +107,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatHo
         });
         if(item.getTotalUnreadCount() > 0) {
             holder.totalUnreadCounter.setText(String.valueOf(item.getTotalUnreadCount()));
+            holder.totalUnreadCounter.setVisibility(View.VISIBLE);
         } else {
+            holder.totalUnreadCounter.setVisibility(View.GONE);
             holder.totalUnreadCounter.setText("");
 
         }
