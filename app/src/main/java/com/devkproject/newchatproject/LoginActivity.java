@@ -45,9 +45,9 @@ public class LoginActivity extends AppCompatActivity {
         loadingBar = new ProgressDialog(this);
 
         mAuth = FirebaseAuth.getInstance();
-//        if(mAuth.getCurrentUser() != null){
-//            SendUserToMainActivity();
-//        }
+        if(mAuth.getCurrentUser() != null){
+            SendUserToMainActivity();
+        }
         UsersRef = FirebaseDatabase.getInstance().getReference().child("users");
 
         signup_button.setOnClickListener(new View.OnClickListener() {

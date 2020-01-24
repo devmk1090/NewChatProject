@@ -2,6 +2,7 @@ package com.devkproject.newchatproject;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
-        setSupportActionBar(toolbar);
+        setSupportActionBar(toolbar); // 툴바를 액티비티의 앱바로 지정
         toolbar.setTitle(R.string.app_name);
 
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -68,13 +69,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_item, menu);
+        SearchView searchView = (SearchView) menu.findItem(R.id.toolbar_search).getActionView();
+        searchView.setQueryHint("친구 추가 검색");
+        searchView.setMaxWidth(Integer.MAX_VALUE);
         return true;
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.toolbar_search:
-                Toast.makeText(getApplicationContext(), "Search Click", Toast.LENGTH_SHORT).show();
+                friendFragment.searchFriends();
                 return true;
             case R.id.toolbar_multiChat:
                 friendFragment.toggleSelectionMode();

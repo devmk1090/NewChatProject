@@ -2,11 +2,13 @@ package com.devkproject.newchatproject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -17,6 +19,7 @@ import android.widget.ImageButton;
 
 import com.devkproject.newchatproject.adapters.MessageListAdapter;
 import com.devkproject.newchatproject.fragment.ChatFragment;
+import com.devkproject.newchatproject.model.AfterMessage;
 import com.devkproject.newchatproject.model.Chat;
 import com.devkproject.newchatproject.model.Message;
 import com.devkproject.newchatproject.model.PhotoMessage;
@@ -117,13 +120,31 @@ public class ChatActivity extends AppCompatActivity {
                 onSendEvent(v);
             }
         });
+
+        final CharSequence[] category = {"사진 전송", "애프터 신청"};
         chat_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                startActivityForResult(intent, TAKE_PHOTO_REQUEST_CODE);
+                AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
+                builder.setTitle("선택하세요");
+                builder.setItems(category, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                Intent intent = new Intent();
+                                intent.setAction(Intent.ACTION_GET_CONTENT);
+                                intent.setType("image/*");
+                                startActivityForResult(intent, TAKE_PHOTO_REQUEST_CODE);
+                                break;
+                            case 1:
+                                AfterEvent();
+                                break;
+
+                                default:
+                        }
+                    }
+                }).show();
             }
         });
     }
@@ -180,6 +201,8 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
+
+    MessageEventListener mMessageEventListener = new MessageEventListener();
 
     private void removeMessageListener() {
         mChatMessageRef.removeEventListener(mMessageEventListener);
@@ -257,6 +280,8 @@ public class ChatActivity extends AppCompatActivity {
                 messageListAdapter.addItem(photoMessage);
             } else if (item.getMessageType() == Message.MessageType.EXIT) {
                 messageListAdapter.addItem(item);
+            } else if (item.getMessageType() == Message.MessageType.AFTER) {
+                messageListAdapter.addItem(item);
             }
             if(callCount >= totalMessageCount) {
                 // 스크롤을 맨 마지막으로 내린다
@@ -286,8 +311,6 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onCancelled(@NonNull DatabaseError databaseError) {}
     }
-
-    MessageEventListener mMessageEventListener = new MessageEventListener();
 
     public void onSendEvent(View v) {
         if(mChatID != null) {
@@ -337,7 +360,17 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
+    private void AfterEvent() {
+        DatabaseReference afterMessageRef = mFirebaseDB.getReference("chat_messages").child(mChatID);
+        AfterMessage afterMessage = new AfterMessage();
+        String messageID = afterMessageRef.push().getKey();
+        afterMessage.setMessageUser(new User(mCurrentUser.getUid(), mCurrentUser.getEmail(), mCurrentUser.getDisplayName(), mCurrentUser.getPhotoUrl().toString()));
+        afterMessage.setMessageDate(new Date());
+        afterMessage.setMessageID(messageID);
+        afterMessage.setChatID(mChatID);
+        afterMessageRef.child(messageID).setValue(afterMessage);
 
+    }
     private Message message = new Message();
     private void sendMessage() {
         // 메세지 키 생성
@@ -362,7 +395,6 @@ public class ChatActivity extends AppCompatActivity {
             message = new PhotoMessage();
             ((PhotoMessage)message).setPhotoUrl(photoUrl);
             bundle.putString("messageType", Message.MessageType.PHOTO.toString());
-
         }
         message.setMessageDate(new Date());
         message.setChatID(mChatID);

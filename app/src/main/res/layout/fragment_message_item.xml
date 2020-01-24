@@ -138,4 +138,43 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
+    <RelativeLayout
+        android:id="@+id/afterArea"
+        android:visibility="gone"
+        android:padding="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="누구님이 누구에게 애프터 신청을 하셨습니다"
+            android:visibility="gone"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/afterTxt"
+            android:padding="7dp"
+            android:textColor="#000"
+            android:textAlignment="center"
+            android:layout_gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:textSize="15dp"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:visibility="gone"
+            android:id="@+id/afterYesButton"
+            android:layout_marginLeft="50dp"
+            android:text="승락"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/afterTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:visibility="gone"
+            android:id="@+id/afterNoButton"
+            android:layout_marginRight="50dp"
+            android:text="거절"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/afterTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
 </LinearLayout>

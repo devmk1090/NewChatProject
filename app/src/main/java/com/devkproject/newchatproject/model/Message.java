@@ -14,7 +14,7 @@ public class Message { // 메세지에 관한 부모 클래스 정도로 보자
     private List<String> readUserList; // 읽은 사람 정보
 
     public enum MessageType {
-        TEXT, PHOTO, EXIT
+        TEXT, PHOTO, EXIT, AFTER
     }
     public String getMessageID() {
         return messageID;
