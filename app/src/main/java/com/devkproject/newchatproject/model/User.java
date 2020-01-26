@@ -6,6 +6,7 @@ public class User {
     private String userNickname;
     private String profileImageUrl;
     private String gender;
+    private boolean afterCount;
     private boolean selection;
 
     public User(){}
@@ -52,5 +53,11 @@ public class User {
     }
     public void setSelection(boolean selection) {
         this.selection = selection;
+    }
+    public boolean isAfterCount() {
+        return afterCount;
+    }
+    public void setAfterCount(boolean afterCount) {
+        this.afterCount = afterCount;
     }
 }

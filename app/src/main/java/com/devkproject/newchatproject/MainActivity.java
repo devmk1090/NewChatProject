@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.devkproject.newchatproject.fragment.ChatFragment;
 import com.devkproject.newchatproject.fragment.FriendsFragment;
@@ -37,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar); // 툴바를 액티비티의 앱바로 지정
-        toolbar.setTitle(R.string.app_name);
+        getSupportActionBar().setTitle(mAuth.getCurrentUser().getDisplayName() + "님 환영합니다");
 
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.main_frameLayout, friendFragment).commitAllowingStateLoss();
@@ -80,6 +79,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.toolbar_search:
                 friendFragment.searchFriends();
                 return true;
+            case R.id.toolbar_addFriend:
+                SendAddFriendActivity();
+                return true;
             case R.id.toolbar_multiChat:
                 friendFragment.toggleSelectionMode();
                 return true;
@@ -94,5 +96,9 @@ public class MainActivity extends AppCompatActivity {
         Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
         loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(loginIntent);
+    }
+    private void SendAddFriendActivity() {
+        Intent intent = new Intent(MainActivity.this, AddFriendActivity.class);
+        startActivity(intent);
     }
 }

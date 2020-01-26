@@ -111,6 +111,9 @@ public class ChatFragment extends Fragment {
                     if(updatedChat.getLastMessage().getMessageType() == Message.MessageType.EXIT) {
                         return;
                     }
+                    if(updatedChat.getLastMessage().getMessageType() == Message.MessageType.AFTER) {
+                        return;
+                    }
                     if (!updatedChat.getLastMessage().getMessageUser().getUid().equals(mCurrentUser.getUid())) {
                         if (!updatedChat.getChatID().equals(JOINED_ROOM)) {
                             // notification code

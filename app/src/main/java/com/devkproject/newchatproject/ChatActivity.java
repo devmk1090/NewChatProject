@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.devkproject.newchatproject.adapters.MessageListAdapter;
 import com.devkproject.newchatproject.fragment.ChatFragment;
@@ -70,8 +71,6 @@ public class ChatActivity extends AppCompatActivity {
     private StorageReference mImageStorageRef;
     private StorageTask uploadTask;
     private FirebaseAnalytics mFirebaseAnalytics;
-
-
     private RecyclerView recyclerView;
     private MessageListAdapter messageListAdapter;
 
@@ -138,7 +137,19 @@ public class ChatActivity extends AppCompatActivity {
                                 startActivityForResult(intent, TAKE_PHOTO_REQUEST_CODE);
                                 break;
                             case 1:
-                                AfterEvent();
+                                mUserRef.child(mCurrentUser.getUid()).child("afterCount").addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        if(dataSnapshot.getValue().equals(true)) {
+                                            AfterEvent();
+                                            mUserRef.child(mCurrentUser.getUid()).child("afterCount").setValue(false);
+                                        } else {
+                                            Toast.makeText(ChatActivity.this, "이미 애프터 신청을 하셨습니다", Toast.LENGTH_LONG).show();
+                                        }
+                                    }
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {}
+                                });
                                 break;
 
                                 default:
@@ -362,7 +373,7 @@ public class ChatActivity extends AppCompatActivity {
     }
     private void AfterEvent() {
         DatabaseReference afterMessageRef = mFirebaseDB.getReference("chat_messages").child(mChatID);
-        AfterMessage afterMessage = new AfterMessage();
+        final AfterMessage afterMessage = new AfterMessage();
         String messageID = afterMessageRef.push().getKey();
         afterMessage.setMessageUser(new User(mCurrentUser.getUid(), mCurrentUser.getEmail(), mCurrentUser.getDisplayName(), mCurrentUser.getPhotoUrl().toString()));
         afterMessage.setMessageDate(new Date());
@@ -370,7 +381,29 @@ public class ChatActivity extends AppCompatActivity {
         afterMessage.setChatID(mChatID);
         afterMessageRef.child(messageID).setValue(afterMessage);
 
+        mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Iterator<DataSnapshot> chatMemberIterator = dataSnapshot.getChildren().iterator();
+                while (chatMemberIterator.hasNext()) {
+                    User charMember = chatMemberIterator.next().getValue(User.class);
+                    mFirebaseDB.getReference("users")
+                            .child(charMember.getUid())
+                            .child("chats")
+                            .child(mChatID)
+                            .child("lastMessage")
+                            .setValue(afterMessage);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
     }
+
     private Message message = new Message();
     private void sendMessage() {
         // 메세지 키 생성

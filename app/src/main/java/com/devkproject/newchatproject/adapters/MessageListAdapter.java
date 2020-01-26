@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.devkproject.newchatproject.ChatActivity;
 import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.model.AfterMessage;
 import com.devkproject.newchatproject.model.Message;
@@ -77,7 +78,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final MessageViewHolder holder, int position) {
         // 전달받은 뷰 홀더를 이용한 뷰 구현 (실제 뷰를 구현하는 부분)
         Message item = getItem(position);
 
@@ -149,6 +150,18 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.afterTxt.setVisibility(View.VISIBLE);
                 holder.afterYesButton.setVisibility(View.VISIBLE);
                 holder.afterNoButton.setVisibility(View.VISIBLE);
+                holder.afterYesButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        holder.sendAfterImage.setVisibility(View.VISIBLE);
+                    }
+                });
+                holder.afterNoButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ((ChatActivity)v.getContext()).finish();
+                    }
+                });
             }
             if(item.getUnreadCount() > 0) {
                 holder.rcvUnreadCount.setText(String.valueOf(item.getUnreadCount()));
@@ -191,7 +204,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         private RelativeLayout afterArea;
         private CircleImageView rcvProfileImage;
         private TextView  rcvTxt, exitTxt, rcvUnreadCount, rcvDate, sendUnreadCount, sendDate, sendTxt, afterTxt;
-        private ImageView sendImage, rcvImage;
+        private ImageView sendImage, rcvImage, sendAfterImage;
         private Button afterYesButton, afterNoButton;
 
         public MessageViewHolder(@NonNull View v) {
@@ -213,6 +226,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             afterTxt = (TextView) v.findViewById(R.id.afterTxt);
             afterYesButton = (Button) v.findViewById(R.id.afterYesButton);
             afterNoButton = (Button) v.findViewById(R.id.afterNoButton);
+            sendAfterImage = (ImageView) v.findViewById(R.id.sendAfterImage);
         }
     }
 }

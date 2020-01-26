@@ -91,6 +91,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatHo
                 holder.lastMessage.setText("(사진)");
             } else if (item.getLastMessage().getMessageType() == Message.MessageType.EXIT) {
                 holder.lastMessage.setText(String.format("%s님이 방에서 나가셨습니다.", item.getLastMessage().getMessageUser().getUserNickname()));
+            } else if (item.getLastMessage().getMessageType() == Message.MessageType.AFTER) {
+                holder.lastMessage.setText("( 애프터 신청 메세지)");
             }
             holder.lastMsgDate.setText(sdf.format(item.getCreateDate()));
         }

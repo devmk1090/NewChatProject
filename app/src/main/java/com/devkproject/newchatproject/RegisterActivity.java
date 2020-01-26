@@ -38,7 +38,7 @@ public class RegisterActivity extends AppCompatActivity {
     private RadioGroup gender;
     private RadioButton man;
     private String strGender;
-    private EditText email, password, nickName;
+    private EditText email, password, nickName, passwordConfirm;
     private ImageView profileImage;
     private Button signUp_FinishButton;
     private Uri imageUri;
@@ -58,6 +58,8 @@ public class RegisterActivity extends AppCompatActivity {
         profileImage = (ImageView) findViewById(R.id.signUp_imageView_profile);
         email = (EditText) findViewById(R.id.signUp_email_editText);
         password = (EditText) findViewById(R.id.signUp_password_editText);
+        passwordConfirm = (EditText) findViewById(R.id.signUp_passwordConfirm_editText);
+
         nickName = (EditText) findViewById(R.id.signUp_nick_editText);
         signUp_FinishButton = (Button) findViewById(R.id.signUp_FinishButton);
 
@@ -85,6 +87,9 @@ public class RegisterActivity extends AppCompatActivity {
         signUp_FinishButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, password.getText().toString());
+                Log.d(TAG, passwordConfirm.getText().toString());
+
                 SignUpUser();
             }
         });
@@ -95,22 +100,19 @@ public class RegisterActivity extends AppCompatActivity {
         final String userPassword = password.getText().toString();
         if(imageUri == null) {
             Toast.makeText(RegisterActivity.this, "이미지를 선택하세요", Toast.LENGTH_SHORT).show();
-        }
-        else if (TextUtils.isEmpty(userEmail)) {
+        } else if (TextUtils.isEmpty(userEmail)) {
             Toast.makeText(RegisterActivity.this, "이메일을 입력하세요", Toast.LENGTH_SHORT).show();
-        }
-        else if(TextUtils.isEmpty(userNickName)) {
+        } else if(TextUtils.isEmpty(userNickName)) {
             Toast.makeText(RegisterActivity.this, "닉네임을 입력하세요", Toast.LENGTH_SHORT).show();
 
-        }
-        else if(TextUtils.isEmpty(userPassword)){
+        } else if(TextUtils.isEmpty(userPassword)){
             Toast.makeText(RegisterActivity.this, "비밀번호를 입력하세요", Toast.LENGTH_SHORT).show();
 
-        }
-        else if (strGender == null) {
+        } else if (!userPassword.equals(passwordConfirm.getText().toString()) ) {
+            Toast.makeText(RegisterActivity.this, "비밀번호가 다릅니다", Toast.LENGTH_SHORT).show();
+        } else if (strGender == null) {
             Toast.makeText(RegisterActivity.this, "성별을 선택해주세요", Toast.LENGTH_SHORT).show();
-        }
-        else {
+        } else {
             mAuth.createUserWithEmailAndPassword(userEmail, userPassword)
                     .addOnCompleteListener(RegisterActivity.this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -141,6 +143,7 @@ public class RegisterActivity extends AppCompatActivity {
                                             userModel.setProfileImageUrl(imageUrl);
                                             userModel.setUid(currentUserID);
                                             userModel.setGender(strGender);
+                                            userModel.setAfterCount(true);
 
                                             UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(userNickName)
                                                     .setPhotoUri(Uri.parse(imageUrl)).build();

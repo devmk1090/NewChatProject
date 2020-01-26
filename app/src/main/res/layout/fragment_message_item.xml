@@ -90,8 +90,15 @@
         android:padding="2dp"
         android:layout_gravity="right"
         android:visibility="gone"
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/sendAfterImage"
+            android:visibility="gone"
+            android:src="@drawable/icon"
+            android:layout_width="25dp"
+            android:layout_height="25dp"/>
         <LinearLayout
             android:padding="2dp"
             android:layout_gravity="center_vertical"

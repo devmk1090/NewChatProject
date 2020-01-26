@@ -8,6 +8,11 @@
         android:title="친구 검색"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
     <item
+        android:id="@+id/toolbar_addFriend"
+        android:icon="@drawable/ic_person_add_black_24dp"
+        app:showAsAction="always"
+        android:title="친구 추가" />
+    <item
         android:id="@+id/toolbar_multiChat"
         android:title="다중 대화"/>
     <item
