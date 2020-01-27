@@ -26,10 +26,16 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+
+import java.util.Iterator;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -40,17 +46,20 @@ public class RegisterActivity extends AppCompatActivity {
     private String strGender;
     private EditText email, password, nickName, passwordConfirm;
     private ImageView profileImage;
-    private Button signUp_FinishButton;
+    private Button signUp_FinishButton, duplicationButton;
     private Uri imageUri;
 
     private StorageReference userProfileImagesRef;
     private FirebaseAuth mAuth;
+    private DatabaseReference userRef;
+    private boolean duplication = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        userRef = FirebaseDatabase.getInstance().getReference().child("users");
         mAuth = FirebaseAuth.getInstance();
         userProfileImagesRef = FirebaseStorage.getInstance().getReference().child("Profile Images");
 
@@ -62,6 +71,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         nickName = (EditText) findViewById(R.id.signUp_nick_editText);
         signUp_FinishButton = (Button) findViewById(R.id.signUp_FinishButton);
+        duplicationButton = (Button) findViewById(R.id.signUp_duplication);
 
         gender.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -84,13 +94,45 @@ public class RegisterActivity extends AppCompatActivity {
                 startActivityForResult(intent, PICK_FROM_ALBUM);
             }
         });
+        duplicationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for(DataSnapshot item : dataSnapshot.getChildren()) {
+                            String name = item.getValue(User.class).getUserNickname();
+                            Log.d(TAG, name);
+                            if(nickName.getText().toString().equals(name)){
+                                Toast.makeText(RegisterActivity.this, "존재하는 아이디입니다", Toast.LENGTH_SHORT).show();
+                                duplication = false;
+                                break;
+                            }
+                            else {
+                                duplication = true;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        });
+
         signUp_FinishButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, password.getText().toString());
                 Log.d(TAG, passwordConfirm.getText().toString());
+                if (duplication == false) {
+                    Toast.makeText(RegisterActivity.this, "아이디 중복체크를 해주세요", Toast.LENGTH_SHORT).show();
+                } else {
+                    SignUpUser();
+                }
 
-                SignUpUser();
             }
         });
     }

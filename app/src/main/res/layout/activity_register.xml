@@ -49,11 +49,22 @@
         android:hint="이메일"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-    <EditText
-        android:id="@+id/signUp_nick_editText"
-        android:hint="닉네임"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content">
+        <EditText
+            android:id="@+id/signUp_nick_editText"
+            android:layout_weight="1"
+            android:hint="닉네임"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/signUp_duplication"
+            android:text="중복확인"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
     <EditText
         android:id="@+id/signUp_password_editText"
         android:inputType="textPassword"
