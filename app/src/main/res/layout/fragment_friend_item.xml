@@ -4,22 +4,17 @@
     android:layout_height="wrap_content">
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_margin="15dp"
+        android:layout_margin="5dp"
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <CheckBox
-            android:id="@+id/users_item_checkBox"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/users_item_image"
             android:src="@drawable/profile_image"
             android:layout_width="70dp"
             android:layout_height="70dp"/>
         <LinearLayout
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="10dp"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -31,23 +26,24 @@
                 android:textAlignment="textStart"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/users_item_email"
-                android:text="user email"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textAlignment="textStart"
-                android:layout_width="200dp"
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/users_accept_button"
+                android:visibility="gone"
+                android:text="수락"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/users_item_status"
-                android:text="user status"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textAlignment="textStart"
-                android:layout_width="200dp"
+            <Button
+                android:layout_marginLeft="20dp"
+                android:id="@+id/users_refuse_button"
+                android:visibility="gone"
+                android:text="거절"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

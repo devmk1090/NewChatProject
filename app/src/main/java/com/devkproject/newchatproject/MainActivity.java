@@ -8,13 +8,14 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.devkproject.newchatproject.fragment.ChatFragment;
 import com.devkproject.newchatproject.fragment.FriendsFragment;
-import com.devkproject.newchatproject.fragment.SetFragment;
+import com.devkproject.newchatproject.fragment.RequestFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -24,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private FragmentManager fragmentManager = getSupportFragmentManager();
     private FriendsFragment friendFragment = new FriendsFragment();
     private ChatFragment chatFragment = new ChatFragment();
-    private SetFragment setFragment = new SetFragment();
+    private RequestFragment requestFragment = new RequestFragment();
     private FirebaseAuth mAuth;
 
 
@@ -34,9 +35,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mAuth = FirebaseAuth.getInstance();
-        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar); // 툴바를 액티비티의 앱바로 지정
         getSupportActionBar().setTitle(mAuth.getCurrentUser().getDisplayName() + "님 환영합니다");
+        toolbar.setTitleTextColor(Color.WHITE);
 
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.main_frameLayout, friendFragment).commitAllowingStateLoss();
@@ -56,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     }
                     case R.id.navi_setting: {
-                        transaction.replace(R.id.main_frameLayout, setFragment).commitAllowingStateLoss();
+                        transaction.replace(R.id.main_frameLayout, requestFragment).commitAllowingStateLoss();
                         return true;
                     }
                 }
@@ -77,13 +79,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.toolbar_search:
-                friendFragment.searchFriends();
                 return true;
             case R.id.toolbar_addFriend:
                 SendAddFriendActivity();
-                return true;
-            case R.id.toolbar_multiChat:
-                friendFragment.toggleSelectionMode();
                 return true;
             case R.id.toolbar_logOut:
                 mAuth.signOut();

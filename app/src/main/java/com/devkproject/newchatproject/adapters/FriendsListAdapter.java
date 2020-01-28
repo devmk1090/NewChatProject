@@ -23,12 +23,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.FriendHolder> {
 
-    public static final int UNSELECTION_MODE = 1;
-    public static final int SELECTION_MODE = 2;
-    private int selectionMode = UNSELECTION_MODE;
-
     private ArrayList<User> friendList;
-
     private DatabaseReference friendRef;
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
@@ -40,34 +35,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         mUser = mAuth.getCurrentUser();
         friendRef = FirebaseDatabase.getInstance().getReference("users").child(mUser.getUid()).child("friends");
     }
-    public void setSelectionMode(int selectionMode) {
-        this.selectionMode = selectionMode;
-        notifyDataSetChanged();
-    }
-    public int getSelectionMode() {
-        return this.selectionMode;
-    }
-    public int getSelectionUserCount() {
-        int selectedCount = 0;
-        for (User user : friendList) {
-            if(user.isSelection()) { // true 인 사람만
-                selectedCount ++;
-            }
-        }
-        return selectedCount;
-    }
 
-    // 선택된 유저들의 정보를 리턴
-    public String [] getSelectedUids() {
-        String [] seletedUids = new String [getSelectionUserCount()];
-        int i = 0;
-        for (User user : friendList) {
-            if(user.isSelection()) { // true 인 사람만
-                seletedUids[i++] = user.getUid();
-            }
-        }
-        return seletedUids;
-    }
     public void addItem(User friend) {
         friendList.add(friend);
         notifyDataSetChanged();
@@ -89,12 +57,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
     public void onBindViewHolder(@NonNull FriendHolder holder, int position) {
         User friend = getItem(position);
         holder.user_name.setText(friend.getUserNickname());
-        holder.user_email.setText(friend.getUserEmail());
-        if(getSelectionMode() == UNSELECTION_MODE) {
-            holder.user_check.setVisibility(View.GONE);
-        } else {
-            holder.user_check.setVisibility(View.VISIBLE);
-        }
+
         if(friend.getProfileImageUrl() != null) {
             Glide.with(holder.itemView)
                     .load(friend.getProfileImageUrl())
@@ -110,16 +73,12 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
     public class FriendHolder extends RecyclerView.ViewHolder {
 
         private CircleImageView user_image;
-        private TextView user_name, user_email, user_status;
-        private CheckBox user_check;
+        private TextView user_name;
 
         public FriendHolder(@NonNull final View itemView) {
             super(itemView);
             user_image = (CircleImageView) itemView.findViewById(R.id.users_item_image);
             user_name = (TextView) itemView.findViewById(R.id.users_item_name);
-            user_email = (TextView) itemView.findViewById(R.id.users_item_email);
-            user_status = (TextView) itemView.findViewById(R.id.users_item_status);
-            user_check = (CheckBox) itemView.findViewById(R.id.users_item_checkBox);
         }
     }
 }

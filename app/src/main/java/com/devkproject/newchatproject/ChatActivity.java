@@ -202,7 +202,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String title = dataSnapshot.getValue(String.class);
                 if(title != null) {
-                    mToolbar.setTitle(title);
+                    mToolbar.setTitle(title + "님과 대화중");
                 }
             }
 

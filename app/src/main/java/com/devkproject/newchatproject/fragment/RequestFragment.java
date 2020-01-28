@@ -14,10 +14,10 @@ import com.devkproject.newchatproject.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class SetFragment extends Fragment {
+public class RequestFragment extends Fragment {
 
 
-    public SetFragment() {
+    public RequestFragment() {
         // Required empty public constructor
     }
 
@@ -25,7 +25,7 @@ public class SetFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View setView = inflater.inflate(R.layout.fragment_set, container,false);
+        View setView = inflater.inflate(R.layout.fragment_request, container,false);
         return setView;
     }
 
