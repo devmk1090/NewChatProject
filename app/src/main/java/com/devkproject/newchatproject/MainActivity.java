@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                         transaction.replace(R.id.main_frameLayout, chatFragment).commitAllowingStateLoss();
                         return true;
                     }
-                    case R.id.navi_setting: {
+                    case R.id.navi_request: {
                         transaction.replace(R.id.main_frameLayout, requestFragment).commitAllowingStateLoss();
                         return true;
                     }

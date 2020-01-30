@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/friend_rootView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <LinearLayout
@@ -30,19 +31,26 @@
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-            <Button
-                android:id="@+id/users_accept_button"
-                android:visibility="gone"
-                android:text="수락"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <Button
-                android:layout_marginLeft="20dp"
-                android:id="@+id/users_refuse_button"
-                android:visibility="gone"
-                android:text="거절"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                <Button
+                    android:id="@+id/users_accept_button"
+                    android:visibility="gone"
+                    android:text="수락"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <Button
+                    android:layout_marginLeft="20dp"
+                    android:id="@+id/users_refuse_button"
+                    android:visibility="gone"
+                    android:text="거절"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <Button
+                    android:layout_marginLeft="20dp"
+                    android:id="@+id/users_request_button"
+                    android:visibility="gone"
+                    android:text="친구 신청"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.devkproject.newchatproject.adapters.AddFriendListAdapter;
 import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -47,6 +48,9 @@ public class AddFriendActivity extends AppCompatActivity {
     private DatabaseReference friendRef;
     private DatabaseReference requesrRef;
 
+    private AddFriendListAdapter addFriendListAdapter;
+    public static String getName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,20 +72,21 @@ public class AddFriendActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("아이디로 친구 찾기");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        addFriendListAdapter = new AddFriendListAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new AddFriendActivityRecyclerViewAdapter());
+        recyclerView.setAdapter(addFriendListAdapter);
 
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 searchFriend();
+
             }
         });
-        addFriendListener();
     }
 
     private void searchFriend() {
-        final String getName = searchText.getText().toString();
+        getName = searchText.getText().toString();
         if(getName.isEmpty()) {
             Toast.makeText(AddFriendActivity.this, "아이디를 입력해주세요", Toast.LENGTH_SHORT).show();
             return;
@@ -96,44 +101,29 @@ public class AddFriendActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for(DataSnapshot friendItem : dataSnapshot.getChildren()) {
                     User user = friendItem.getValue(User.class);
-                    if(user.getUserNickname().equals(getName)) {
+                    if (user.getUserNickname().equals(getName) && user.getRequestType().equals("accept")) {
                         Toast.makeText(AddFriendActivity.this, "이미 등록된 친구입니다.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if(user.getUserNickname().equals(getName) && user.getRequestType().equals("sendRequest")) {
+                        Toast.makeText(AddFriendActivity.this, "친구 신청을 이미 보냈습니다", Toast.LENGTH_SHORT).show();
                         return;
                     }
                 }
                 userRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
                         Iterator<DataSnapshot> usersIterator = dataSnapshot.getChildren().iterator();
                         int userCount = (int) dataSnapshot.getChildrenCount();
                         int loopCount = 1;
 
-                        while(usersIterator.hasNext()) {
+                        while (usersIterator.hasNext()) {
 
                             final User currentUser = usersIterator.next().getValue(User.class);
-                            if(getName.equals(currentUser.getUserNickname())) {
-                                friendRef.push().setValue(currentUser, new DatabaseReference.CompletionListener() {
-                                    @Override
-                                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-
-                                        userRef.child(mCurrentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                User user = dataSnapshot.getValue(User.class);
-                                                // 내 정보를 친구에게 등록
-                                                userRef.child(currentUser.getUid()).child("friends").push().setValue(user);
-                                                Toast.makeText(AddFriendActivity.this, "친구등록 완료", Toast.LENGTH_SHORT).show();
-                                            }
-
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                            }
-                                        });
-                                    }
-                                });
-                                requesrRef.child(mCurrentUser.getUid()).child(currentUser.getUid()).push().setValue("sent");
-                                requesrRef.child(currentUser.getUid()).child(mCurrentUser.getUid()).push().setValue("received");
+                            if (getName.equals(currentUser.getUserNickname())) {
+                                addFriendListAdapter.clear();
+                                addFriendListAdapter.addItem(currentUser);
                             } else {
                                 if(loopCount++ >= userCount) {
                                     Toast.makeText(AddFriendActivity.this, "가입을 하지 않은 아이디입니다", Toast.LENGTH_SHORT).show();
@@ -141,8 +131,8 @@ public class AddFriendActivity extends AppCompatActivity {
                                 }
                             }
                         }
-                    }
 
+                    }
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
 
@@ -154,6 +144,7 @@ public class AddFriendActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
     private void addFriendListener() {
@@ -161,7 +152,9 @@ public class AddFriendActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 User friend = dataSnapshot.getValue(User.class);
-                friendList.add(friend);
+                if(friend.getRequestType().equals("")) {
+                    friendList.add(friend);
+                }
             }
 
             @Override
@@ -184,61 +177,6 @@ public class AddFriendActivity extends AppCompatActivity {
 
             }
         });
-    }
-
-    class AddFriendActivityRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
-        public AddFriendActivityRecyclerViewAdapter() {
-
-        }
-
-        public User getItem(int position) {
-            return friendList.get(position);
-        }
-
-        @NonNull
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_friend_item, parent, false);
-            return new CustomViewHolder(v);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            User friend = getItem(position);
-            CustomViewHolder customViewHolder = (CustomViewHolder) holder;
-
-            customViewHolder.userAccept.setVisibility(View.VISIBLE);
-            customViewHolder.userRefuse.setVisibility(View.VISIBLE);
-            customViewHolder.userName.setText(friend.getUserNickname());
-            if(friend.getProfileImageUrl() != null) {
-                Glide.with(holder.itemView)
-                        .load(friend.getProfileImageUrl())
-                        .into(customViewHolder.imageView);
-            }
-
-
-        }
-
-        @Override
-        public int getItemCount() {
-            return friendList.size();
-        }
-
-        private class CustomViewHolder extends RecyclerView.ViewHolder {
-
-            public CircleImageView imageView;
-            public TextView userName;
-            public Button userAccept, userRefuse;
-
-            public CustomViewHolder(@NonNull View v) {
-                super(v);
-                imageView = (CircleImageView) v.findViewById(R.id.users_item_image);
-                userName = (TextView) v.findViewById(R.id.users_item_name);
-                userAccept = (Button) v.findViewById(R.id.users_accept_button);
-                userRefuse = (Button) v.findViewById(R.id.users_refuse_button);
-            }
-        }
     }
 
     @Override

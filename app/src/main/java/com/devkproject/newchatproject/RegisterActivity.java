@@ -100,17 +100,20 @@ public class RegisterActivity extends AppCompatActivity {
                 userRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for(DataSnapshot item : dataSnapshot.getChildren()) {
-                            String name = item.getValue(User.class).getUserNickname();
-                            Log.d(TAG, name);
-                            if(nickName.getText().toString().equals(name)){
-                                Toast.makeText(RegisterActivity.this, "존재하는 아이디입니다", Toast.LENGTH_SHORT).show();
-                                duplication = false;
-                                break;
+                        if(dataSnapshot.exists()) {
+                            for (DataSnapshot item : dataSnapshot.getChildren()) {
+                                String name = item.getValue(User.class).getUserNickname();
+                                Log.d(TAG, name);
+                                if (nickName.getText().toString().equals(name)) {
+                                    Toast.makeText(RegisterActivity.this, "존재하는 아이디입니다", Toast.LENGTH_SHORT).show();
+                                    duplication = false;
+                                    break;
+                                } else {
+                                    duplication = true;
+                                }
                             }
-                            else {
-                                duplication = true;
-                            }
+                        } else {
+                            duplication = true;
                         }
                     }
 
@@ -146,10 +149,8 @@ public class RegisterActivity extends AppCompatActivity {
             Toast.makeText(RegisterActivity.this, "이메일을 입력하세요", Toast.LENGTH_SHORT).show();
         } else if(TextUtils.isEmpty(userNickName)) {
             Toast.makeText(RegisterActivity.this, "닉네임을 입력하세요", Toast.LENGTH_SHORT).show();
-
         } else if(TextUtils.isEmpty(userPassword)){
             Toast.makeText(RegisterActivity.this, "비밀번호를 입력하세요", Toast.LENGTH_SHORT).show();
-
         } else if (!userPassword.equals(passwordConfirm.getText().toString()) ) {
             Toast.makeText(RegisterActivity.this, "비밀번호가 다릅니다", Toast.LENGTH_SHORT).show();
         } else if (strGender == null) {
@@ -185,6 +186,7 @@ public class RegisterActivity extends AppCompatActivity {
                                             userModel.setProfileImageUrl(imageUrl);
                                             userModel.setUid(currentUserID);
                                             userModel.setGender(strGender);
+                                            userModel.setRequestType("");
                                             userModel.setAfterCount(true);
 
                                             UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(userNickName)

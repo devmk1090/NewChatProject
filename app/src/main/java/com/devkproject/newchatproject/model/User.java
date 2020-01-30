@@ -6,6 +6,7 @@ public class User {
     private String userNickname;
     private String profileImageUrl;
     private String gender;
+    private String requestType;
     private boolean afterCount;
     private boolean selection;
 
@@ -59,5 +60,11 @@ public class User {
     }
     public void setAfterCount(boolean afterCount) {
         this.afterCount = afterCount;
+    }
+    public String getRequestType() {
+        return requestType;
+    }
+    public void setRequestType(String requestType) {
+        this.requestType = requestType;
     }
 }

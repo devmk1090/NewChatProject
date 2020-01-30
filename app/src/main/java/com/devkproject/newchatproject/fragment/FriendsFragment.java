@@ -32,9 +32,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import java.util.Iterator;
 
 public class FriendsFragment extends Fragment {
 
@@ -104,7 +102,9 @@ public class FriendsFragment extends Fragment {
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 // User 모델과 friend 는 구조가 동일하기 때문에 User 모델로 가져온다
                 User friend = dataSnapshot.getValue(User.class);
-                friendsListAdapter.addItem(friend);
+                if(friend.getRequestType().equals("accept")) {
+                    friendsListAdapter.addItem(friend);
+                }
             }
 
             @Override

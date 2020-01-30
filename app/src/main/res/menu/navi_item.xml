@@ -9,7 +9,7 @@
         android:icon="@drawable/baseline_chat_black_24dp"
         android:title="대화"/>
     <item
-        android:id="@+id/navi_setting"
+        android:id="@+id/navi_request"
         android:icon="@drawable/baseline_account_circle_black_24dp"
-        android:title="설정"/>
+        android:title="요청"/>
 </menu>
