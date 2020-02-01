@@ -20,6 +20,9 @@ import com.devkproject.newchatproject.model.Message;
 import com.devkproject.newchatproject.model.PhotoMessage;
 import com.devkproject.newchatproject.model.TextMessage;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,12 +32,19 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.MessageViewHolder> {
 
     private ArrayList<Message> messageList;
-    private String userID;
     private SimpleDateFormat messageDateFormat = new SimpleDateFormat("MM/dd a\n hh:mm");
+
+    private FirebaseAuth mAuth;
+    private FirebaseUser mCurrentUser;
+    private DatabaseReference chatRef;
+    private DatabaseReference userRef;
 
     public MessageListAdapter() {
         messageList = new ArrayList<>();
-        userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        mAuth = FirebaseAuth.getInstance();
+        mCurrentUser = mAuth.getCurrentUser();
+        chatRef = FirebaseDatabase.getInstance().getReference().child("chat_messages");
+        userRef = FirebaseDatabase.getInstance().getReference().child("users").child(mCurrentUser.getUid()).child("chats");
     }
 
     public void addItem(Message item) {
@@ -87,14 +97,13 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         AfterMessage afterMessage = null;
         if(item instanceof TextMessage) {
             textMessage = (TextMessage) item;
-        }
-        else if (item instanceof PhotoMessage) {
+        } else if (item instanceof PhotoMessage) {
             photoMessage = (PhotoMessage) item;
         } else if (item instanceof AfterMessage) {
             afterMessage = (AfterMessage) item;
         }
         // 내가 보낸 메세지인지, 받은 메세지인지 판별
-        if(userID.equals(item.getMessageUser().getUid())) {
+        if(mCurrentUser.getUid().equals(item.getMessageUser().getUid())) {
             //내가 보낸 메세지
             if(item.getMessageType() == Message.MessageType.TEXT) {
                 holder.sendTxt.setText(textMessage.getMessageText());
@@ -109,7 +118,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.sendImage.setVisibility(View.VISIBLE);
             }
             else if(item.getMessageType() == Message.MessageType.AFTER) {
-                holder.afterTxt.setText(item.getMessageUser().getUserNickname() + "님에게 애프터 신청 ㄱㄱ");
+                holder.afterTxt.setText(item.getMessageUser().getUserNickname() + "님에게 애프터 신청을 하셨습니다");
                 holder.afterTxt.setVisibility(View.VISIBLE);
             }
             if(item.getUnreadCount() > 0) {
@@ -153,13 +162,15 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.afterYesButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        holder.sendAfterImage.setVisibility(View.VISIBLE);
+
                     }
                 });
                 holder.afterNoButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         ((ChatActivity)v.getContext()).finish();
+
+
                     }
                 });
             }

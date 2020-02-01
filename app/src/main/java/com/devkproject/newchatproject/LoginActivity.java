@@ -75,8 +75,8 @@ public class LoginActivity extends AppCompatActivity {
         }
         else {
             loadingBar.setTitle("로그인");
-            loadingBar.setMessage("잠시만 기다려주세요. 로그인 중입니다.");
-            loadingBar.setCanceledOnTouchOutside(true);
+            loadingBar.setMessage("로그인 중입니다");
+            loadingBar.setCanceledOnTouchOutside(false);
             loadingBar.show();
 
             mAuth.signInWithEmailAndPassword(email, password)

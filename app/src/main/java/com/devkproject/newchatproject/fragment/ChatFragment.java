@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,7 @@ import java.util.Iterator;
 
 public class ChatFragment extends Fragment {
 
+    private static final String TAG = "ChatFragment";
     private FirebaseUser mCurrentUser;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mChatRef;
@@ -124,12 +126,6 @@ public class ChatFragment extends Fragment {
                                     .setTitle(updatedChat.getLastMessage().getMessageUser().getUserNickname())
                                     .setText(updatedChat.getLastMessage().getMessageText())
                                     .notification();
-
-                            // 메세지 수신 Analytics 수집
-                            Bundle bundle = new Bundle();
-                            bundle.putString("friend", updatedChat.getLastMessage().getMessageUser().getUserEmail());
-                            bundle.putString("me", mCurrentUser.getEmail());
-                            mFirebaseAnalytics.logEvent("notification", bundle);
                         }
                     }
                 }
@@ -214,15 +210,36 @@ public class ChatFragment extends Fragment {
         final DatabaseReference messageRef = mFirebaseDatabase.getReference("chat_messages").child(chat.getChatID());
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), 3);
         builder.setTitle("선택된 대화방을 나가시겠습니까?")
+                .setIcon(R.drawable.ic_priority_high_black_24dp)
                 .setPositiveButton("예", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        mChatMemberRef.child(chat.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                int i = (int) dataSnapshot.getChildrenCount();
+                                if (i == 1) {
+                                    Log.d(TAG, String.valueOf(i));
+                                    mChatMessageRef.child(chat.getChatID()).removeValue(new DatabaseReference.CompletionListener() {
+                                        @Override
+                                        public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
 
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
                         // users > {uid} > chats 나의 대화방 목록 제거
                         mChatRef.child(chat.getChatID()).removeValue(new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                                 // chat_members > {chat_id} > {user_id} 채팅 멤버 목록에서 제거
+
 
                                 //  (나가기 메세지) chat_messages > {chat_id} > {message_id} > {exit 메세지} 발송
                                 final ExitMessage exitMessage = new ExitMessage();
@@ -242,12 +259,6 @@ public class ChatFragment extends Fragment {
                                     public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                                         // messages > {chat_id} unreadCount 에서 제거
                                         // getReadUserList 내가 있다면 읽은거니 pass, 없다면 unreadCount -1
-
-                                        // 방에서 나갈때 Analytics 수집
-                                        Bundle bundle = new Bundle();
-                                        bundle.putString("me", mCurrentUser.getEmail());
-                                        bundle.putString("chatID", chat.getChatID());
-                                        mFirebaseAnalytics.logEvent("leaveChat", bundle);
 
                                         // (나가기 메세지) 채팅방의 멤버정보, 방정보를 각각 가져오고 라스트 메세지 수정
                                         mChatMemberRef

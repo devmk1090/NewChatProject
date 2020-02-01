@@ -1,12 +1,15 @@
 package com.devkproject.newchatproject.adapters;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -14,6 +17,7 @@ import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -24,16 +28,20 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.FriendHolder> {
 
     private ArrayList<User> friendList;
+
     private DatabaseReference friendRef;
+    private DatabaseReference userRef;
     private FirebaseAuth mAuth;
-    private FirebaseUser mUser;
+    private FirebaseUser mCurrentUser;
 
 
     public FriendsListAdapter() {
         friendList = new ArrayList<>();
         mAuth = FirebaseAuth.getInstance();
-        mUser = mAuth.getCurrentUser();
-        friendRef = FirebaseDatabase.getInstance().getReference("users").child(mUser.getUid()).child("friends");
+        mCurrentUser = mAuth.getCurrentUser();
+        friendRef = FirebaseDatabase.getInstance().getReference("users").child(mCurrentUser.getUid()).child("friends");
+        userRef = FirebaseDatabase.getInstance().getReference("users");
+
     }
 
     public void addItem(User friend) {
@@ -54,15 +62,49 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
     }
 
     @Override
-    public void onBindViewHolder(@NonNull FriendHolder holder, int position) {
-        User friend = getItem(position);
-        holder.user_name.setText(friend.getUserNickname());
+    public void onBindViewHolder(@NonNull final FriendHolder holder, int position) {
+        final User friend = getItem(position);
 
+        holder.user_name.setText(friend.getUserNickname());
         if(friend.getProfileImageUrl() != null) {
             Glide.with(holder.itemView)
                     .load(friend.getProfileImageUrl())
                     .into(holder.user_image);
         }
+        holder.rootView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), 3);
+                builder.setTitle("친구를 삭제하시겠습니까?")
+                        .setIcon(R.drawable.ic_priority_high_black_24dp)
+                        .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                holder.rootView.setVisibility(View.GONE);
+
+                                friendRef.child(friend.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                        userRef.child(friend.getUid()).child("friends").child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+                                            @Override
+                                            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        })
+                        .setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        }).show();
+                return true;
+            }
+        });
     }
 
     @Override
@@ -74,11 +116,13 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 
         private CircleImageView user_image;
         private TextView user_name;
+        private RelativeLayout rootView;
 
         public FriendHolder(@NonNull final View itemView) {
             super(itemView);
             user_image = (CircleImageView) itemView.findViewById(R.id.users_item_image);
             user_name = (TextView) itemView.findViewById(R.id.users_item_name);
+            rootView = (RelativeLayout) itemView.findViewById(R.id.friend_rootView);
         }
     }
 }

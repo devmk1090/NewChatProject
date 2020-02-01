@@ -83,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
             case R.id.toolbar_addFriend:
                 SendAddFriendActivity();
                 return true;
+            case R.id.toolbar_help:
+                return true;
             case R.id.toolbar_logOut:
                 mAuth.signOut();
                 SendUserToLoginActivity();

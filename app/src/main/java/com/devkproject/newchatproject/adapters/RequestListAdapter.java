@@ -8,6 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -15,6 +16,7 @@ import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -78,6 +80,18 @@ public class RequestListAdapter extends RecyclerView.Adapter<RequestListAdapter.
                 friendRef.child(friend.getUid()).child("requestType").setValue("refuse");
                 requestHolder.rootView.setVisibility(View.GONE);
                 notifyDataSetChanged();
+                friendRef.child(friend.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                        userRef.child(friend.getUid()).child("friends").child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+
+                            }
+                        });
+                    }
+                });
+
             }
         });
 

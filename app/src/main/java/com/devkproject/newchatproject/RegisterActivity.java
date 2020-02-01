@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -48,6 +49,7 @@ public class RegisterActivity extends AppCompatActivity {
     private ImageView profileImage;
     private Button signUp_FinishButton, duplicationButton;
     private Uri imageUri;
+    private ProgressDialog loadingBar;
 
     private StorageReference userProfileImagesRef;
     private FirebaseAuth mAuth;
@@ -72,6 +74,7 @@ public class RegisterActivity extends AppCompatActivity {
         nickName = (EditText) findViewById(R.id.signUp_nick_editText);
         signUp_FinishButton = (Button) findViewById(R.id.signUp_FinishButton);
         duplicationButton = (Button) findViewById(R.id.signUp_duplication);
+        loadingBar = new ProgressDialog(this);
 
         gender.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -156,6 +159,10 @@ public class RegisterActivity extends AppCompatActivity {
         } else if (strGender == null) {
             Toast.makeText(RegisterActivity.this, "성별을 선택해주세요", Toast.LENGTH_SHORT).show();
         } else {
+            loadingBar.setTitle("계정 생성");
+            loadingBar.setMessage("계정 생성 중입니다");
+            loadingBar.setCanceledOnTouchOutside(true);
+            loadingBar.show();
             mAuth.createUserWithEmailAndPassword(userEmail, userPassword)
                     .addOnCompleteListener(RegisterActivity.this, new OnCompleteListener<AuthResult>() {
                         @Override

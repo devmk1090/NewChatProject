@@ -101,7 +101,7 @@ public class AddFriendActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for(DataSnapshot friendItem : dataSnapshot.getChildren()) {
                     User user = friendItem.getValue(User.class);
-                    if (user.getUserNickname().equals(getName) && user.getRequestType().equals("accept")) {
+                    if (user.getUserNickname().equals(getName) && user.getRequestType().equals("")) {
                         Toast.makeText(AddFriendActivity.this, "이미 등록된 친구입니다.", Toast.LENGTH_SHORT).show();
                         return;
                     }
