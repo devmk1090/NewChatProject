@@ -59,7 +59,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private String mChatID;
     private EditText chat_message;
-    private ImageButton chat_camera, chat_send;
+    private ImageButton chat_side, chat_send;
     private Toolbar mToolbar;
 
     private FirebaseDatabase mFirebaseDB;
@@ -80,7 +80,7 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         chat_message = (EditText) findViewById(R.id.chat_message_editText);
-        chat_camera = (ImageButton) findViewById(R.id.chat_camera_button);
+        chat_side = (ImageButton) findViewById(R.id.chat_side_button);
         chat_send = (ImageButton) findViewById(R.id.chat_send_button);
         mToolbar = (Toolbar) findViewById(R.id.chat_room_toolbar);
         recyclerView= (RecyclerView) findViewById(R.id.chat_recyclerView);
@@ -121,7 +121,7 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         final CharSequence[] category = {"사진 전송", "애프터 신청"};
-        chat_camera.setOnClickListener(new View.OnClickListener() {
+        chat_side.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
@@ -131,27 +131,43 @@ public class ChatActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case 0:
-                                Intent intent = new Intent();
-                                intent.setAction(Intent.ACTION_GET_CONTENT);
-                                intent.setType("image/*");
-                                startActivityForResult(intent, TAKE_PHOTO_REQUEST_CODE);
-                                break;
+                                if(mChatID != null) {
+                                    Intent intent = new Intent();
+                                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                                    intent.setType("image/*");
+                                    startActivityForResult(intent, TAKE_PHOTO_REQUEST_CODE);
+                                    break;
+                                } else {
+                                    Toast.makeText(ChatActivity.this, "대화를 먼저 나눈뒤 실행하세요", Toast.LENGTH_SHORT).show();
+                                }
                             case 1:
-                                mUserRef.child(mCurrentUser.getUid()).child("afterCount").addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        if(dataSnapshot.getValue().equals(true)) {
-                                            AfterEvent();
-                                            mUserRef.child(mCurrentUser.getUid()).child("afterCount").setValue(false);
-                                        } else {
-                                            Toast.makeText(ChatActivity.this, "이미 애프터 신청을 하셨습니다", Toast.LENGTH_LONG).show();
+                                if(mChatID != null) {
+                                    mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            for (DataSnapshot friendItem : dataSnapshot.getChildren()) {
+                                                User friendUser = friendItem.getValue(User.class);
+                                                if (!friendUser.getUid().equals(mCurrentUser.getUid()) && friendUser.isAfterCount() == true) {
+                                                    AfterEvent();
+                                                    mChatMemberRef.child(friendUser.getUid()).child("afterCount").setValue(false);
+                                                    return;
+                                                }
+                                                if (!friendUser.getUid().equals(mCurrentUser.getUid()) && friendUser.isAfterCount() == false) {
+                                                    Toast.makeText(ChatActivity.this, "이미 애프터 신청을 하셨습니다", Toast.LENGTH_SHORT).show();
+                                                    return;
+                                                }
+                                            }
                                         }
-                                    }
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {}
-                                });
-                                break;
 
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+                                    });
+                                    break;
+                                } else {
+                                    Toast.makeText(ChatActivity.this, "대화를 먼저 나눈뒤 실행하세요", Toast.LENGTH_SHORT).show();
+                                }
                                 default:
                         }
                     }

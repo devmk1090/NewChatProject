@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,13 +17,18 @@ import com.bumptech.glide.Glide;
 import com.devkproject.newchatproject.ChatActivity;
 import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.model.AfterMessage;
+import com.devkproject.newchatproject.model.Chat;
 import com.devkproject.newchatproject.model.Message;
 import com.devkproject.newchatproject.model.PhotoMessage;
 import com.devkproject.newchatproject.model.TextMessage;
+import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,6 +44,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
     private FirebaseUser mCurrentUser;
     private DatabaseReference chatRef;
     private DatabaseReference userRef;
+    private DatabaseReference mChatMemberRef;
 
     public MessageListAdapter() {
         messageList = new ArrayList<>();
@@ -45,6 +52,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         mCurrentUser = mAuth.getCurrentUser();
         chatRef = FirebaseDatabase.getInstance().getReference().child("chat_messages");
         userRef = FirebaseDatabase.getInstance().getReference().child("users").child(mCurrentUser.getUid()).child("chats");
+        mChatMemberRef = FirebaseDatabase.getInstance().getReference("chat_members");
     }
 
     public void addItem(Message item) {
@@ -90,7 +98,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
     @Override
     public void onBindViewHolder(@NonNull final MessageViewHolder holder, int position) {
         // 전달받은 뷰 홀더를 이용한 뷰 구현 (실제 뷰를 구현하는 부분)
-        Message item = getItem(position);
+        final Message item = getItem(position);
 
         TextMessage textMessage = null;
         PhotoMessage photoMessage = null;
@@ -118,7 +126,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.sendImage.setVisibility(View.VISIBLE);
             }
             else if(item.getMessageType() == Message.MessageType.AFTER) {
-                holder.afterTxt.setText(item.getMessageUser().getUserNickname() + "님에게 애프터 신청을 하셨습니다");
+                holder.afterTxt.setText(item.getMessageUser().getUserNickname() + "님이 애프터 신청을 하셨습니다");
                 holder.afterTxt.setVisibility(View.VISIBLE);
             }
             if(item.getUnreadCount() > 0) {
@@ -162,7 +170,22 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.afterYesButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        mChatMemberRef.child(item.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for (DataSnapshot friendItem : dataSnapshot.getChildren()) {
+                                    User friendUser = friendItem.getValue(User.class);
+                                    if(friendUser.getUid().equals(mCurrentUser.getUid()) && friendUser.isAfterCount() == false) {
+                                        mChatMemberRef.child(item.getChatID()).child(friendUser.getUid()).child("afterCount").setValue(true);
+                                        return;
+                                    }
+                                }
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
 
+                            }
+                        });
                     }
                 });
                 holder.afterNoButton.setOnClickListener(new View.OnClickListener() {

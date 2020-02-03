@@ -80,7 +80,6 @@ public class ChatFragment extends Fragment {
             @Override
             public void onItemClick(View view, int position) {
                 Chat chat = chatListAdapter.getItem(position);
-
                 Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
                 chatIntent.putExtra("chat_id", chat.getChatID());
                 startActivityForResult(chatIntent, JOIN_ROOM_REQUEST_CODE);
@@ -242,14 +241,27 @@ public class ChatFragment extends Fragment {
 
 
                                 //  (나가기 메세지) chat_messages > {chat_id} > {message_id} > {exit 메세지} 발송
+
                                 final ExitMessage exitMessage = new ExitMessage();
-                                String messageID = messageRef.push().getKey();
+                                final String messageID = messageRef.push().getKey();
 
                                 exitMessage.setMessageUser(new User(mCurrentUser.getUid(), mCurrentUser.getEmail(), mCurrentUser.getDisplayName(), mCurrentUser.getPhotoUrl().toString()));
                                 exitMessage.setMessageDate(new Date());
                                 exitMessage.setMessageID(messageID);
                                 exitMessage.setChatID(chat.getChatID());
-                                messageRef.child(messageID).setValue(exitMessage);
+                                mChatMemberRef.child(chat.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        int i = (int) dataSnapshot.getChildrenCount();
+                                        if(i > 1) {
+                                            messageRef.child(messageID).setValue(exitMessage);
+                                        }
+                                    }
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
 
                                 mChatMemberRef
                                         .child(chat.getChatID())
@@ -304,6 +316,7 @@ public class ChatFragment extends Fragment {
                                         });
                                     }
                                 });
+
                                 // 대화방의 타이틀이 변경된 것을 리스너가 감지하여 방 이름을 업데이트 해야함.
                                 mChatMemberRef.child(chat.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
