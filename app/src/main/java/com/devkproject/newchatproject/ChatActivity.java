@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.devkproject.newchatproject.adapters.MessageListAdapter;
@@ -61,6 +62,7 @@ public class ChatActivity extends AppCompatActivity {
     private EditText chat_message;
     private ImageButton chat_side, chat_send;
     private Toolbar mToolbar;
+    private RelativeLayout message_rootView;
 
     private FirebaseDatabase mFirebaseDB;
     private DatabaseReference mChatRef;
@@ -84,6 +86,8 @@ public class ChatActivity extends AppCompatActivity {
         chat_send = (ImageButton) findViewById(R.id.chat_send_button);
         mToolbar = (Toolbar) findViewById(R.id.chat_room_toolbar);
         recyclerView= (RecyclerView) findViewById(R.id.chat_recyclerView);
+        message_rootView = (RelativeLayout) findViewById(R.id.message_rootView);
+
 
         mFirebaseDB = FirebaseDatabase.getInstance();
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -93,7 +97,8 @@ public class ChatActivity extends AppCompatActivity {
 
         setSupportActionBar(mToolbar);
         mToolbar.setTitleTextColor(Color.WHITE);
-
+        chat_send.setEnabled(true);
+        chat_side.setEnabled(true);
         if(mChatID != null) {
             mChatRef = mFirebaseDB.getReference("users").child(mCurrentUser.getUid()).child("chats").child(mChatID);
             mChatMessageRef = mFirebaseDB.getReference("chat_messages").child(mChatID);
@@ -113,13 +118,17 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setAdapter(messageListAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        chat_send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSendEvent(v);
-            }
-        });
-
+        if(mChatID != null && mChatMemberRef.child(mCurrentUser.getUid()).child("chatStop").equals(false)) {
+            chat_send.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onSendEvent(v);
+                }
+            });
+        } else {
+            chat_send.setEnabled(false);
+            chat_side.setEnabled(false);
+        }
         final CharSequence[] category = {"사진 전송", "애프터 신청"};
         chat_side.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -275,11 +284,16 @@ public class ChatActivity extends AppCompatActivity {
                                 mutablePhotoMessage.setUnreadCount(mutableUnreadCount);
                                 mutableData.setValue(mutablePhotoMessage);
                             }
-                            else {
+                            else if(mutableMessage.getMessageType() == Message.MessageType.TEXT) {
                                 TextMessage mutableTextMessage = mutableData.getValue(TextMessage.class);
                                 mutableTextMessage.setReadUserList(mutableReadUserList);
                                 mutableTextMessage.setUnreadCount(mutableUnreadCount);
                                 mutableData.setValue(mutableTextMessage);
+                            } else {
+                                AfterMessage mutableAfterMessage = mutableData.getValue(AfterMessage.class);
+                                mutableAfterMessage.setReadUserList(mutableReadUserList);
+                                mutableAfterMessage.setUnreadCount(mutableUnreadCount);
+                                mutableData.setValue(mutableAfterMessage);
                             }
                             return Transaction.success(mutableData);
                         }
@@ -319,6 +333,7 @@ public class ChatActivity extends AppCompatActivity {
 
         @Override
         public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            // 실시간 반영
             // 변경된 메세지 ex)unreadCount
             // 어댑터쪽에 변경된 메세지 데이터를 전달하고 메세지 아이디 번호로 해당 메세지의 위치를 알아내서 메세지 리스트의 값을 변경한다
             Message item = dataSnapshot.getValue(Message.class);
@@ -329,7 +344,11 @@ public class ChatActivity extends AppCompatActivity {
             else if (item.getMessageType() == Message.MessageType.PHOTO) {
                 PhotoMessage photoMessage = dataSnapshot.getValue(PhotoMessage.class);
                 messageListAdapter.updateItem(photoMessage);
+            } else if (item.getMessageType() == Message.MessageType.AFTER) {
+                AfterMessage afterMessage = dataSnapshot.getValue(AfterMessage.class);
+                messageListAdapter.updateItem(afterMessage);
             }
+
         }
         @Override
         public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {}
@@ -395,6 +414,7 @@ public class ChatActivity extends AppCompatActivity {
         afterMessage.setMessageDate(new Date());
         afterMessage.setMessageID(messageID);
         afterMessage.setChatID(mChatID);
+        afterMessage.setAfterButton(true);
         afterMessageRef.child(messageID).setValue(afterMessage);
 
         mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {

@@ -8,7 +8,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,7 +16,6 @@ import com.bumptech.glide.Glide;
 import com.devkproject.newchatproject.ChatActivity;
 import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.model.AfterMessage;
-import com.devkproject.newchatproject.model.Chat;
 import com.devkproject.newchatproject.model.Message;
 import com.devkproject.newchatproject.model.PhotoMessage;
 import com.devkproject.newchatproject.model.TextMessage;
@@ -167,6 +165,13 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.afterTxt.setVisibility(View.VISIBLE);
                 holder.afterYesButton.setVisibility(View.VISIBLE);
                 holder.afterNoButton.setVisibility(View.VISIBLE);
+                if(item.getMessageUser().isAfterCount() == false) {
+                    holder.afterYesButton.setEnabled(true);
+                    holder.afterNoButton.setEnabled(true);
+                } else {
+                    holder.afterYesButton.setEnabled(false);
+                    holder.afterNoButton.setEnabled(false);
+                }
                 holder.afterYesButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -186,14 +191,26 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
 
                             }
                         });
-                    }
+                        chatRef.child(item.getChatID()).child(item.getMessageID()).child("messageUser").child("afterCount").setValue(true);
+                      }
                 });
                 holder.afterNoButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ((ChatActivity)v.getContext()).finish();
+                        mChatMemberRef.child(item.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for(DataSnapshot friendItem : dataSnapshot.getChildren()) {
+                                    User friendUser = friendItem.getValue(User.class);
+                                    mChatMemberRef.child(item.getChatID()).child(friendUser.getUid()).child("chatStop").setValue(true);
+                                }
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-
+                            }
+                        });
+                        //  ((ChatActivity)v.getContext()).finish();
                     }
                 });
             }

@@ -8,7 +8,7 @@ public class User {
     private String gender;
     private String requestType;
     private boolean afterCount;
-    private boolean selection;
+    private boolean chatStop;
 
     public User(){}
 
@@ -49,12 +49,6 @@ public class User {
     public void setGender(String gender) {
         this.gender = gender;
     }
-    public boolean isSelection() {
-        return selection;
-    }
-    public void setSelection(boolean selection) {
-        this.selection = selection;
-    }
     public boolean isAfterCount() {
         return afterCount;
     }
@@ -66,5 +60,11 @@ public class User {
     }
     public void setRequestType(String requestType) {
         this.requestType = requestType;
+    }
+    public boolean isChatStop() {
+        return chatStop;
+    }
+    public void setChatStop(boolean chatStop) {
+        this.chatStop = chatStop;
     }
 }
