@@ -97,8 +97,7 @@ public class ChatActivity extends AppCompatActivity {
 
         setSupportActionBar(mToolbar);
         mToolbar.setTitleTextColor(Color.WHITE);
-        chat_send.setEnabled(true);
-        chat_side.setEnabled(true);
+
         if(mChatID != null) {
             mChatRef = mFirebaseDB.getReference("users").child(mCurrentUser.getUid()).child("chats").child(mChatID);
             mChatMessageRef = mFirebaseDB.getReference("chat_messages").child(mChatID);
@@ -118,17 +117,13 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setAdapter(messageListAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        if(mChatID != null && mChatMemberRef.child(mCurrentUser.getUid()).child("chatStop").equals(false)) {
-            chat_send.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onSendEvent(v);
-                }
-            });
-        } else {
-            chat_send.setEnabled(false);
-            chat_side.setEnabled(false);
-        }
+        chat_send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSendEvent(v);
+            }
+        });
+
         final CharSequence[] category = {"사진 전송", "애프터 신청"};
         chat_side.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -177,7 +172,7 @@ public class ChatActivity extends AppCompatActivity {
                                 } else {
                                     Toast.makeText(ChatActivity.this, "대화를 먼저 나눈뒤 실행하세요", Toast.LENGTH_SHORT).show();
                                 }
-                                default:
+                            default:
                         }
                     }
                 }).show();
@@ -283,8 +278,7 @@ public class ChatActivity extends AppCompatActivity {
                                 mutablePhotoMessage.setReadUserList(mutableReadUserList);
                                 mutablePhotoMessage.setUnreadCount(mutableUnreadCount);
                                 mutableData.setValue(mutablePhotoMessage);
-                            }
-                            else if(mutableMessage.getMessageType() == Message.MessageType.TEXT) {
+                            } else if(mutableMessage.getMessageType() == Message.MessageType.TEXT) {
                                 TextMessage mutableTextMessage = mutableData.getValue(TextMessage.class);
                                 mutableTextMessage.setReadUserList(mutableReadUserList);
                                 mutableTextMessage.setUnreadCount(mutableUnreadCount);
@@ -340,8 +334,7 @@ public class ChatActivity extends AppCompatActivity {
             if(item.getMessageType() == Message.MessageType.TEXT) {
                 TextMessage textMessage = dataSnapshot.getValue(TextMessage.class);
                 messageListAdapter.updateItem(textMessage);
-            }
-            else if (item.getMessageType() == Message.MessageType.PHOTO) {
+            } else if (item.getMessageType() == Message.MessageType.PHOTO) {
                 PhotoMessage photoMessage = dataSnapshot.getValue(PhotoMessage.class);
                 messageListAdapter.updateItem(photoMessage);
             } else if (item.getMessageType() == Message.MessageType.AFTER) {

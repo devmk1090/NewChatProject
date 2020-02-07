@@ -161,7 +161,7 @@ public class RegisterActivity extends AppCompatActivity {
         } else {
             loadingBar.setTitle("계정 생성");
             loadingBar.setMessage("계정 생성 중입니다");
-            loadingBar.setCanceledOnTouchOutside(true);
+            loadingBar.setCanceledOnTouchOutside(false);
             loadingBar.show();
             mAuth.createUserWithEmailAndPassword(userEmail, userPassword)
                     .addOnCompleteListener(RegisterActivity.this, new OnCompleteListener<AuthResult>() {
@@ -212,8 +212,6 @@ public class RegisterActivity extends AppCompatActivity {
                                         }
                                     }
                                 });
-//                                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-//                                startActivity(intent);
                             } else {
                                 String message = task.getException().toString();
                                 Toast.makeText(RegisterActivity.this, "Error : " + message, Toast.LENGTH_SHORT).show();

@@ -1,5 +1,8 @@
 package com.devkproject.newchatproject.adapters;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -35,22 +39,25 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.MessageViewHolder> {
 
+    private static final String TAG = "MessageListAdapter";
     private ArrayList<Message> messageList;
     private SimpleDateFormat messageDateFormat = new SimpleDateFormat("MM/dd a\n hh:mm");
 
     private FirebaseAuth mAuth;
     private FirebaseUser mCurrentUser;
     private DatabaseReference chatRef;
-    private DatabaseReference userRef;
+    private DatabaseReference userChatRef;
     private DatabaseReference mChatMemberRef;
+    private DatabaseReference userRef;
 
     public MessageListAdapter() {
         messageList = new ArrayList<>();
         mAuth = FirebaseAuth.getInstance();
         mCurrentUser = mAuth.getCurrentUser();
         chatRef = FirebaseDatabase.getInstance().getReference().child("chat_messages");
-        userRef = FirebaseDatabase.getInstance().getReference().child("users").child(mCurrentUser.getUid()).child("chats");
+        userChatRef = FirebaseDatabase.getInstance().getReference().child("users").child(mCurrentUser.getUid()).child("chats");
         mChatMemberRef = FirebaseDatabase.getInstance().getReference("chat_members");
+        userRef = FirebaseDatabase.getInstance().getReference("users");
     }
 
     public void addItem(Message item) {
@@ -192,25 +199,81 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                             }
                         });
                         chatRef.child(item.getChatID()).child(item.getMessageID()).child("messageUser").child("afterCount").setValue(true);
-                      }
+                    }
                 });
                 holder.afterNoButton.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
-                        mChatMemberRef.child(item.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                for(DataSnapshot friendItem : dataSnapshot.getChildren()) {
-                                    User friendUser = friendItem.getValue(User.class);
-                                    mChatMemberRef.child(item.getChatID()).child(friendUser.getUid()).child("chatStop").setValue(true);
-                                }
-                            }
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                    public void onClick(final View v) {
+//                        mChatMemberRef.child(item.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
+//                            @Override
+//                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                                for(DataSnapshot friendItem : dataSnapshot.getChildren()) {
+//                                    User friendUser = friendItem.getValue(User.class);
+//                                    mChatMemberRef.child(item.getChatID()).child(friendUser.getUid()).child("chatStop").setValue(true);
+//                                }
+//                            }
+//                            @Override
+//                            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                            }
+//                        });
 
-                            }
-                        });
-                        //  ((ChatActivity)v.getContext()).finish();
+                        // 애프터 버튼 거절시 절차
+                        // 1. user -> chats 삭제(실시간으로 방없어짐)
+                        // 2. chat_messages 해당방의 메세지 모두 삭제
+                        // 3. 상대방 -> chats 삭제
+                        // 4. chat_members 삭제
+                        // 5. 나와 친구의 친구 등록 삭제
+                        AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                        builder.setMessage("채팅에서 나가집니다")
+                                .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        ((ChatActivity)v.getContext()).finish();
+                                        userChatRef.child(item.getChatID()).removeValue(new DatabaseReference.CompletionListener() {
+                                            @Override
+                                            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                                chatRef.child(item.getChatID()).removeValue(new DatabaseReference.CompletionListener() {
+                                                    @Override
+                                                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                                        userRef.child(item.getMessageUser().getUid()).child("chats").child(item.getChatID()).removeValue(new DatabaseReference.CompletionListener() {
+                                                            @Override
+                                                            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                                                mChatMemberRef.child(item.getChatID()).removeValue(new DatabaseReference.CompletionListener() {
+                                                                    @Override
+                                                                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                                                        userRef.child(mCurrentUser.getUid()).child("friends").child(item.getMessageUser().getUid()).removeValue(new DatabaseReference.CompletionListener() {
+
+                                                                            @Override
+                                                                            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                                                                userRef.child(item.getMessageUser().getUid()).child("friends").child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+
+                                                                                    @Override
+                                                                                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+
+                                                                                    }
+                                                                                });
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                });
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        });
+                                        //  ((ChatActivity)v.getContext()).stopChat(item.getChatID());
+
+                                    }
+                                })
+                                .setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                    }
+                                })
+                                .show();
                     }
                 });
             }
