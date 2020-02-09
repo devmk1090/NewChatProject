@@ -112,6 +112,7 @@ public class RegisterActivity extends AppCompatActivity {
                                     duplication = false;
                                     break;
                                 } else {
+                                    Log.d(TAG, name);
                                     duplication = true;
                                 }
                             }
@@ -204,11 +205,13 @@ public class RegisterActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onSuccess(Void aVoid) {
                                                     RegisterActivity.this.finish();
+                                                    loadingBar.dismiss();
                                                 }
                                             });
                                         }
                                         else {
                                             Toast.makeText(RegisterActivity.this, "업로드에 실패하였습니다", Toast.LENGTH_SHORT).show();
+                                            loadingBar.dismiss();
                                         }
                                     }
                                 });

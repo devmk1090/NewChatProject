@@ -152,13 +152,20 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.afterArea.setVisibility(View.GONE);
             }
 
+
         }
         else {
             // 상대방이 보낸 경우
+            if(item.isAfterYes() == true) {
+                holder.rcvAfterImage.setVisibility(View.VISIBLE);
+            } else {
+                holder.rcvAfterImage.setVisibility(View.GONE);
+            }
             if (item.getMessageType() == Message.MessageType.TEXT) {
                 holder.rcvTxt.setText(textMessage.getMessageText());
                 holder.rcvTxt.setVisibility(View.VISIBLE);
                 holder.rcvImage.setVisibility(View.GONE);
+
             } else if (item.getMessageType() == Message.MessageType.PHOTO) {
                 Glide.with(holder.yourArea)
                         .load(photoMessage.getPhotoUrl())
@@ -189,16 +196,19 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                                     User friendUser = friendItem.getValue(User.class);
                                     if(friendUser.getUid().equals(mCurrentUser.getUid()) && friendUser.isAfterCount() == false) {
                                         mChatMemberRef.child(item.getChatID()).child(friendUser.getUid()).child("afterCount").setValue(true);
+                                        chatRef.child(item.getChatID()).child(item.getMessageID()).child("messageUser").child("afterCount").setValue(true);
+
+                                        // 상대방 채팅옆에 하트를 띄움
+                                        mChatMemberRef.child(item.getChatID()).child(mCurrentUser.getUid()).child("afterYes").setValue(true);
+                                        mChatMemberRef.child(item.getChatID()).child(item.getMessageUser().getUid()).child("afterYes").setValue(true);
                                         return;
                                     }
                                 }
                             }
                             @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
+                            public void onCancelled(@NonNull DatabaseError databaseError) {}
                         });
-                        chatRef.child(item.getChatID()).child(item.getMessageID()).child("messageUser").child("afterCount").setValue(true);
+
                     }
                 });
                 holder.afterNoButton.setOnClickListener(new View.OnClickListener() {
@@ -318,7 +328,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         private RelativeLayout afterArea;
         private CircleImageView rcvProfileImage;
         private TextView  rcvTxt, exitTxt, rcvUnreadCount, rcvDate, sendUnreadCount, sendDate, sendTxt, afterTxt;
-        private ImageView sendImage, rcvImage, sendAfterImage;
+        private ImageView sendImage, rcvImage, sendAfterImage, rcvAfterImage;
         private Button afterYesButton, afterNoButton;
 
         public MessageViewHolder(@NonNull View v) {
@@ -341,6 +351,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             afterYesButton = (Button) v.findViewById(R.id.afterYesButton);
             afterNoButton = (Button) v.findViewById(R.id.afterNoButton);
             sendAfterImage = (ImageView) v.findViewById(R.id.sendAfterImage);
+            rcvAfterImage = (ImageView) v.findViewById(R.id.rcvAfterImage);
         }
     }
 }

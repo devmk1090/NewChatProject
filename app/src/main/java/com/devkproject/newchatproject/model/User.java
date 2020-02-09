@@ -8,7 +8,7 @@ public class User {
     private String gender;
     private String requestType;
     private boolean afterCount;
-    private boolean chatStop;
+    private boolean afterYes;
 
     public User(){}
 
@@ -61,10 +61,10 @@ public class User {
     public void setRequestType(String requestType) {
         this.requestType = requestType;
     }
-    public boolean isChatStop() {
-        return chatStop;
+    public boolean isAfterYes() {
+        return afterYes;
     }
-    public void setChatStop(boolean chatStop) {
-        this.chatStop = chatStop;
+    public void setAfterYes(boolean afterYes) {
+        this.afterYes = afterYes;
     }
 }

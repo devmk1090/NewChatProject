@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.devkproject.newchatproject.R;
+import com.devkproject.newchatproject.model.Chat;
 import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -52,6 +53,24 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         return this.friendList.get(position);
     }
 
+    public void removeItem(User friend) {
+        int position = getItemPosition(friend.getUid());
+        if(position > -1) {
+            friendList.remove(position);
+            notifyDataSetChanged();
+        }
+    }
+
+    private int getItemPosition(String friendUid){
+        int position = 0;
+        for(User currentItem : friendList) {
+            if(currentItem.getUid().equals(friendUid)) {
+                return position;
+            }
+            position ++;
+        }
+        return -1;
+    }
     @NonNull
     @Override
     public FriendHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -81,7 +100,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
-                                holder.rootView.setVisibility(View.GONE);
+                                removeItem(friend);
 
                                 friendRef.child(friend.getUid()).removeValue(new DatabaseReference.CompletionListener() {
                                     @Override

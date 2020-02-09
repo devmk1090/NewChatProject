@@ -1,13 +1,16 @@
 package com.devkproject.newchatproject;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
@@ -84,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 SendAddFriendActivity();
                 return true;
             case R.id.toolbar_help:
+                toolbarHelp();
                 return true;
             case R.id.toolbar_logOut:
                 mAuth.signOut();
@@ -100,5 +104,17 @@ public class MainActivity extends AppCompatActivity {
     private void SendAddFriendActivity() {
         Intent intent = new Intent(MainActivity.this, AddFriendActivity.class);
         startActivity(intent);
+    }
+    private void toolbarHelp() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("도움말")
+                .setIcon(R.drawable.ic_help_black_24dp)
+                .setMessage("블라블라블라")
+                .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                }).show();
     }
 }

@@ -441,23 +441,30 @@ public class ChatActivity extends AppCompatActivity {
         String messageID = mChatMessageRef.push().getKey();
         String messageText = chat_message.getText().toString();
 
-        // 메세지 보내기 Analytics 수집
-        final Bundle bundle = new Bundle();
-        bundle.putString("me", mCurrentUser.getEmail());
-        bundle.putString("roomID", mChatID);
-
         if(messageType == Message.MessageType.TEXT) {
             if(messageText.isEmpty()) {
                 return;
             }
             message = new TextMessage();
             ((TextMessage)message).setMessageText(messageText);
-            bundle.putString("messageType", Message.MessageType.TEXT.toString());
         } else if (messageType == Message.MessageType.PHOTO) {
             message = new PhotoMessage();
             ((PhotoMessage)message).setPhotoUrl(photoUrl);
-            bundle.putString("messageType", Message.MessageType.PHOTO.toString());
         }
+        
+        mChatMemberRef.child(mCurrentUser.getUid()).child("afterYes").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue().equals(true)) {
+                    message.setAfterYes(true);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
         message.setMessageDate(new Date());
         message.setChatID(mChatID);
         message.setMessageID(messageID);
@@ -484,7 +491,6 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
 
-                        mFirebaseAnalytics.logEvent("sendMessage", bundle);
 
                         Iterator<DataSnapshot> memberIterator = dataSnapshot.getChildren().iterator();
                         while(memberIterator.hasNext()) {

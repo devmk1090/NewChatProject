@@ -115,7 +115,7 @@ public class FriendsFragment extends Fragment {
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
                 User friend = dataSnapshot.getValue(User.class);
-
+                friendsListAdapter.removeItem(friend);
             }
 
             @Override

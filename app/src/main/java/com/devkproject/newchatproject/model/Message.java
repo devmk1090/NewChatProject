@@ -12,6 +12,7 @@ public class Message { // 메세지에 관한 부모 클래스 정도로 보자
     private Date messageDate;
     private MessageType messageType;
     private List<String> readUserList; // 읽은 사람 정보
+    private boolean afterYes;
 
     public enum MessageType {
         TEXT, PHOTO, EXIT, AFTER
@@ -57,5 +58,11 @@ public class Message { // 메세지에 관한 부모 클래스 정도로 보자
     }
     public void setMessageType(MessageType messageType) {
         this.messageType = messageType;
+    }
+    public boolean isAfterYes() {
+        return afterYes;
+    }
+    public void setAfterYes(boolean afterYes) {
+        this.afterYes = afterYes;
     }
 }

@@ -6,7 +6,7 @@
     <!-- 상대방-->
     <LinearLayout
         android:id="@+id/yourChatArea"
-        android:visibility="gone"
+        android:visibility="visible"
         android:padding="2dp"
         android:orientation="horizontal"
         android:layout_width="wrap_content"
@@ -61,6 +61,13 @@
                 android:textAlignment="textStart"
                 android:textColor="#68747C"/>
         </LinearLayout>
+        <ImageView
+            android:id="@+id/rcvAfterImage"
+            android:visibility="visible"
+            android:src="@drawable/icon"
+            android:layout_gravity="center"
+            android:layout_width="25dp"
+            android:layout_height="25dp"/>
     </LinearLayout>
 
     <!-- 방 나갔을때-->
