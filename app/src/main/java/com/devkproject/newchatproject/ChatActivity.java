@@ -222,7 +222,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String title = dataSnapshot.getValue(String.class);
                 if(title != null) {
-                    mToolbar.setTitle(title + "님과 대화중");
+                    mToolbar.setTitle(title);
                 }
             }
 
@@ -408,6 +408,7 @@ public class ChatActivity extends AppCompatActivity {
         afterMessage.setMessageID(messageID);
         afterMessage.setChatID(mChatID);
         afterMessage.setAfterButton(true);
+        afterMessage.setMessageText(mCurrentUser.getDisplayName() + "님이 애프터 신청을 하셨습니다");
         afterMessageRef.child(messageID).setValue(afterMessage);
 
         mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -450,8 +451,9 @@ public class ChatActivity extends AppCompatActivity {
         } else if (messageType == Message.MessageType.PHOTO) {
             message = new PhotoMessage();
             ((PhotoMessage)message).setPhotoUrl(photoUrl);
+            ((PhotoMessage)message).setMessageText("사진");
         }
-        
+
         mChatMemberRef.child(mCurrentUser.getUid()).child("afterYes").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -459,11 +461,8 @@ public class ChatActivity extends AppCompatActivity {
                     message.setAfterYes(true);
                 }
             }
-
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
+            public void onCancelled(@NonNull DatabaseError databaseError) {}
         });
         message.setMessageDate(new Date());
         message.setChatID(mChatID);
@@ -541,8 +540,8 @@ public class ChatActivity extends AppCompatActivity {
     private void createChat() {
         final Chat chat = new Chat();
         // users > {uid} > chats > {chat_uid} 의 고유 값을 가져온다
-        mChatRef = mFirebaseDB.getReference("users").child(mCurrentUser.getUid()).child("chats");
         mChatID = mChatRef.push().getKey();
+        mChatRef = mChatRef.child(mChatID);
         mChatMemberRef = mFirebaseDB.getReference("chat_members").child(mChatID);
         mChatMessageRef = mFirebaseDB.getReference("chat_messages").child(mChatID);
 
@@ -579,13 +578,6 @@ public class ChatActivity extends AppCompatActivity {
                                 // 한번 메세지 보내면 못보내도록 true 로 변경
                                 addMessageListener();
                                 isSentMessage = true;
-
-                                // 방 만들때 Analytics 수집
-                                Bundle bundle = new Bundle();
-                                bundle.putString("me", mCurrentUser.getEmail());
-                                bundle.putString("roomID", mChatID);
-                                mFirebaseAnalytics.logEvent("createChat", bundle);
-
                                 ChatFragment.JOINED_ROOM = mChatID;
                             }
                         }

@@ -27,6 +27,8 @@ import com.devkproject.newchatproject.model.ExitMessage;
 import com.devkproject.newchatproject.model.Message;
 import com.devkproject.newchatproject.model.Notification;
 import com.devkproject.newchatproject.model.User;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,6 +38,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.Date;
 import java.util.Iterator;
@@ -55,6 +59,7 @@ public class ChatFragment extends Fragment {
     private Notification mNotification;
     private FirebaseAnalytics mFirebaseAnalytics;
     private DatabaseReference mChatMessageRef;
+    private StorageReference storageRef;
 
     public ChatFragment() {}
 
@@ -70,6 +75,7 @@ public class ChatFragment extends Fragment {
         mChatMemberRef = mFirebaseDatabase.getReference("chat_members");
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
         mChatMessageRef = mFirebaseDatabase.getReference("chat_messages");
+        storageRef = FirebaseStorage.getInstance().getReference("/chats");
 
         chatRecyclerView = (RecyclerView) chatView.findViewById(R.id.chat_room_recyclerView);
         chatListAdapter = new ChatListAdapter();
@@ -110,9 +116,6 @@ public class ChatFragment extends Fragment {
                 // totalUnread 의 변경, title 의 변경, lastMessage 변경시에 호출됨
                 if (updatedChat.getLastMessage() != null) {
                     if(updatedChat.getLastMessage().getMessageType() == Message.MessageType.EXIT) {
-                        return;
-                    }
-                    if(updatedChat.getLastMessage().getMessageType() == Message.MessageType.AFTER) {
                         return;
                     }
                     if (!updatedChat.getLastMessage().getMessageUser().getUid().equals(mCurrentUser.getUid())) {
@@ -183,7 +186,7 @@ public class ChatFragment extends Fragment {
                     if ( loopCount == memberCount ) {
                         // users/uid/chats/{chat_id}/title
                         String title = memberStringBuffer.toString();
-                        if ( chatRoom.getTitle() == null ) {
+                        if (chatRoom.getTitle() == null ) {
                             chatDataSnapshot.getRef().child("title").setValue(title);
                         } else if (!chatRoom.getTitle().equals(title)){
                             chatDataSnapshot.getRef().child("title").setValue(title);
@@ -213,6 +216,8 @@ public class ChatFragment extends Fragment {
                 .setPositiveButton("예", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        // 대화방의 마지막 사람이 나가면 챗멤버 삭제 + 사진 삭제
                         mChatMemberRef.child(chat.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -223,6 +228,17 @@ public class ChatFragment extends Fragment {
                                         @Override
                                         public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
 
+                                            storageRef.child(chat.getChatID()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    Log.d(TAG, "삭제 완료");
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    e.printStackTrace();
+                                                }
+                                            });
                                         }
                                     });
                                 }

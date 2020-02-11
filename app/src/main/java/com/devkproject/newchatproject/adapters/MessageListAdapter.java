@@ -24,6 +24,8 @@ import com.devkproject.newchatproject.model.Message;
 import com.devkproject.newchatproject.model.PhotoMessage;
 import com.devkproject.newchatproject.model.TextMessage;
 import com.devkproject.newchatproject.model.User;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -31,6 +33,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,6 +53,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
     private DatabaseReference userChatRef;
     private DatabaseReference mChatMemberRef;
     private DatabaseReference userRef;
+    private StorageReference storageRef;
 
     public MessageListAdapter() {
         messageList = new ArrayList<>();
@@ -58,6 +63,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         userChatRef = FirebaseDatabase.getInstance().getReference().child("users").child(mCurrentUser.getUid()).child("chats");
         mChatMemberRef = FirebaseDatabase.getInstance().getReference("chat_members");
         userRef = FirebaseDatabase.getInstance().getReference("users");
+        storageRef = FirebaseStorage.getInstance().getReference("/chats");
     }
 
     public void addItem(Message item) {
@@ -133,6 +139,8 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             else if(item.getMessageType() == Message.MessageType.AFTER) {
                 holder.afterTxt.setText(item.getMessageUser().getUserNickname() + "님이 애프터 신청을 하셨습니다");
                 holder.afterTxt.setVisibility(View.VISIBLE);
+                holder.afterYesButton.setVisibility(View.GONE);
+                holder.afterNoButton.setVisibility(View.GONE);
             }
             if(item.getUnreadCount() > 0) {
                 holder.sendUnreadCount.setText(String.valueOf(item.getUnreadCount()));
@@ -214,20 +222,6 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.afterNoButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-//                        mChatMemberRef.child(item.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
-//                            @Override
-//                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                                for(DataSnapshot friendItem : dataSnapshot.getChildren()) {
-//                                    User friendUser = friendItem.getValue(User.class);
-//                                    mChatMemberRef.child(item.getChatID()).child(friendUser.getUid()).child("chatStop").setValue(true);
-//                                }
-//                            }
-//                            @Override
-//                            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                            }
-//                        });
-
                         // 애프터 버튼 거절시 절차
                         // 1. user -> chats 삭제(실시간으로 방없어짐)
                         // 2. chat_messages 해당방의 메세지 모두 삭제
@@ -257,10 +251,19 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                                                                             @Override
                                                                             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                                                                                 userRef.child(item.getMessageUser().getUid()).child("friends").child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
-
                                                                                     @Override
                                                                                     public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-
+                                                                                        storageRef.child(item.getChatID()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                                            @Override
+                                                                                            public void onSuccess(Void aVoid) {
+                                                                                                Log.d(TAG, "삭제 완료");
+                                                                                            }
+                                                                                        }).addOnFailureListener(new OnFailureListener() {
+                                                                                            @Override
+                                                                                            public void onFailure(@NonNull Exception e) {
+                                                                                                Log.d(TAG, String.valueOf(e));
+                                                                                            }
+                                                                                        });
                                                                                     }
                                                                                 });
                                                                             }
@@ -273,8 +276,6 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                                                 });
                                             }
                                         });
-                                        //  ((ChatActivity)v.getContext()).stopChat(item.getChatID());
-
                                     }
                                 })
                                 .setNegativeButton("아니오", new DialogInterface.OnClickListener() {

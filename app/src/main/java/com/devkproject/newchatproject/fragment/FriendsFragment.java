@@ -12,12 +12,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import com.devkproject.newchatproject.ChatActivity;
 import com.devkproject.newchatproject.R;
@@ -43,6 +41,7 @@ public class FriendsFragment extends Fragment {
     private DatabaseReference userRef;
     private DatabaseReference friendsRef;
     private FirebaseAnalytics mFirebaseAnalytics;
+    private DatabaseReference mChatMemberRef;
 
     private RecyclerView recyclerView;
     private FriendsListAdapter friendsListAdapter;
@@ -62,6 +61,7 @@ public class FriendsFragment extends Fragment {
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
         friendsRef = FirebaseDatabase.getInstance().getReference("users").child(mUser.getUid()).child("friends");
         userRef = FirebaseDatabase.getInstance().getReference("users");
+        mChatMemberRef = FirebaseDatabase.getInstance().getReference("chat_members");
 
         addFriendListener();
 
