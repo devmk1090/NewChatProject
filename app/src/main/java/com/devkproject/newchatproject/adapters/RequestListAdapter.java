@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -94,13 +93,7 @@ public class RequestListAdapter extends RecyclerView.Adapter<RequestListAdapter.
 
             }
         });
-
         requestHolder.user_name.setText(friend.getUserNickname());
-        if(friend.getProfileImageUrl() != null) {
-            Glide.with(holder.itemView)
-                    .load(friend.getProfileImageUrl())
-                    .into(requestHolder.user_image);
-        }
     }
 
     @Override

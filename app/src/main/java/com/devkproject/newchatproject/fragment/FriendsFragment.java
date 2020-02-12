@@ -30,6 +30,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
 public class FriendsFragment extends Fragment {
@@ -45,6 +46,7 @@ public class FriendsFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private FriendsListAdapter friendsListAdapter;
+    //private String test = "-M-oytdAyCntwEWmTaJH";
 
     public FriendsFragment() {}
 
@@ -80,6 +82,7 @@ public class FriendsFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int which) {
                         Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
                         chatIntent.putExtra("uid", friend.getUid());
+                      //  chatIntent.putExtra("chat_id",test);
                         startActivityForResult(chatIntent, ChatFragment.JOIN_ROOM_REQUEST_CODE);
                     }
                 }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
@@ -93,6 +96,21 @@ public class FriendsFragment extends Fragment {
         }));
 
         return friendsView;
+    }
+    private void chatMember() {
+        mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot item : dataSnapshot.getChildren()) {
+                    String key = item.getKey();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void addFriendListener() {

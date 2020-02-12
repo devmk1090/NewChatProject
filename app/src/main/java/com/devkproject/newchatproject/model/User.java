@@ -4,19 +4,16 @@ public class User {
     private String uid;
     private String userEmail;
     private String userNickname;
-    private String profileImageUrl;
-    private String gender;
     private String requestType;
     private boolean afterCount;
     private boolean afterYes;
 
     public User(){}
 
-    public User(String uid, String userEmail, String userNickname, String profileImageUrl) {
+    public User(String uid, String userEmail, String userNickname) {
         this.uid = uid;
         this.userEmail = userEmail;
         this.userNickname = userNickname;
-        this.profileImageUrl = profileImageUrl;
     }
 
     public String getUserNickname() {
@@ -31,23 +28,11 @@ public class User {
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
     }
-    public String getProfileImageUrl() {
-        return profileImageUrl;
-    }
-    public void setProfileImageUrl(String profileImageUrl) {
-        this.profileImageUrl = profileImageUrl;
-    }
     public String getUid() {
         return uid;
     }
     public void setUid(String uid) {
         this.uid = uid;
-    }
-    public String getGender() {
-        return gender;
-    }
-    public void setGender(String gender) {
-        this.gender = gender;
     }
     public boolean isAfterCount() {
         return afterCount;

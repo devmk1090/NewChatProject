@@ -403,7 +403,7 @@ public class ChatActivity extends AppCompatActivity {
         DatabaseReference afterMessageRef = mFirebaseDB.getReference("chat_messages").child(mChatID);
         final AfterMessage afterMessage = new AfterMessage();
         String messageID = afterMessageRef.push().getKey();
-        afterMessage.setMessageUser(new User(mCurrentUser.getUid(), mCurrentUser.getEmail(), mCurrentUser.getDisplayName(), mCurrentUser.getPhotoUrl().toString()));
+        afterMessage.setMessageUser(new User(mCurrentUser.getUid(), mCurrentUser.getEmail(), mCurrentUser.getDisplayName()));
         afterMessage.setMessageDate(new Date());
         afterMessage.setMessageID(messageID);
         afterMessage.setChatID(mChatID);
@@ -468,7 +468,7 @@ public class ChatActivity extends AppCompatActivity {
         message.setChatID(mChatID);
         message.setMessageID(messageID);
         message.setMessageType(messageType);
-        message.setMessageUser(new User(mCurrentUser.getUid(), mCurrentUser.getEmail(), mCurrentUser.getDisplayName(), mCurrentUser.getPhotoUrl().toString()));
+        message.setMessageUser(new User(mCurrentUser.getUid(), mCurrentUser.getEmail(), mCurrentUser.getDisplayName()));
         message.setReadUserList(Arrays.asList(new String[]{mCurrentUser.getUid()})); // 자기 자신은 읽었으므로
         String [] uids = getIntent().getStringArrayExtra("uids");
         if(uids != null) {

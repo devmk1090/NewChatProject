@@ -20,6 +20,9 @@ import com.devkproject.newchatproject.fragment.ChatFragment;
 import com.devkproject.newchatproject.fragment.FriendsFragment;
 import com.devkproject.newchatproject.fragment.RequestFragment;
 import com.devkproject.newchatproject.model.Chat;
+import com.devkproject.newchatproject.model.User;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,9 +30,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.Iterator;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -139,38 +145,105 @@ public class MainActivity extends AppCompatActivity {
                 }).show();
     }
     // [회원 탈퇴 로직]
-    // 1.chat_member 삭제 -> 상대의 채팅방에 대화상대가 없는 방입니다 출력
-    // 2.상대방 친구목록에서 나를 삭제
-    // 3.users 의 나의 정보 삭제
-    // 4.나의 계정 삭제
+    // 1.나의 계정 삭제
+    // 2.users 의 나의 정보 삭제
+    // 3.chat_members 에서 chatID 를 얻어온다. 값이 없으면 finishAffinity 를 호출하여 종료.
+    // 3-1.chat_members 가 한명뿐이라면 chat_message 삭제
+    // 4.chat_members 에서 나를 삭제
+    // 5.상대방 친구 목록에서 나를 삭제
     private void MemberWithdraw() {
-        mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Chat item = dataSnapshot.getValue(Chat.class);
-                String id = item.getChatID();
-                Log.d(TAG, id);
-            }
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(R.drawable.ic_info_black_24dp)
+                .setTitle("회원 탈퇴")
+                .setMessage("블라블라블라")
+                .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mCurrentUser.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isSuccessful()) {
 
+                                    userRef.child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+                                        @Override
+                                        public void onComplete(@Nullable final DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+
+                                            mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    if(dataSnapshot.exists()) {
+                                                        for (DataSnapshot item : dataSnapshot.getChildren()) {
+                                                            final String key = item.getKey();
+
+                                                            mChatMemberRef.child(key).child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+                                                                @Override
+                                                                public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                        @Override
+                                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                            for (DataSnapshot uid : dataSnapshot.getChildren()) {
+                                                                                User user = uid.getValue(User.class);
+                                                                                if (!mCurrentUser.getUid().equals(user.getUid())) {
+                                                                                    userRef.child(user.getUid()).child("friends").child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+                                                                                        @Override
+                                                                                        public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                                                                            finishAffinity();
+                                                                                        }
+                                                                                    });
+                                                                                }
+                                                                            }
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                        }
+                                                                    });
+                                                                }
+                                                            });
+                                                        }
+                                                    } else {
+                                                        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                for (DataSnapshot uid : dataSnapshot.getChildren()) {
+                                                                    User user = uid.getValue(User.class);
+                                                                    if (!mCurrentUser.getUid().equals(user.getUid())) {
+                                                                        userRef.child(user.getUid()).child("friends").child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+                                                                            @Override
+                                                                            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                                                                finishAffinity();
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            @Override
+                                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+            public void onClick(DialogInterface dialog, int which) {
 
             }
-        });
-//        mCurrentUser.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Void> task) {
-//                if(task.isSuccessful()) {
-//                    Log.d(TAG, "계정 삭제 완료");
-//                    userRef.child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
-//                        @Override
-//                        public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-//                            finishAffinity();
-//                        }
-//                    });
-//                }
-//            }
-//        });
+        }).show();
+
     }
     @Override
     public void onBackPressed() {

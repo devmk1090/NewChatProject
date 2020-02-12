@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.devkproject.newchatproject.ChatActivity;
+import com.devkproject.newchatproject.MainActivity;
 import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.adapters.ChatListAdapter;
 import com.devkproject.newchatproject.customviews.RecyclerViewItemClickListener;
@@ -261,7 +262,7 @@ public class ChatFragment extends Fragment {
                                 final ExitMessage exitMessage = new ExitMessage();
                                 final String messageID = messageRef.push().getKey();
 
-                                exitMessage.setMessageUser(new User(mCurrentUser.getUid(), mCurrentUser.getEmail(), mCurrentUser.getDisplayName(), mCurrentUser.getPhotoUrl().toString()));
+                                exitMessage.setMessageUser(new User(mCurrentUser.getUid(), mCurrentUser.getEmail(), mCurrentUser.getDisplayName()));
                                 exitMessage.setMessageDate(new Date());
                                 exitMessage.setMessageID(messageID);
                                 exitMessage.setChatID(chat.getChatID());

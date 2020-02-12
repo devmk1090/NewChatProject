@@ -6,43 +6,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
+    android:layout_margin="10dp"
     android:layout_marginBottom="50dp"
     tools:context=".RegisterActivity">
     <TextView
         android:textSize="50dp"
         android:text="회원가입"
+        android:layout_marginBottom="50dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
-    <ImageView
-        android:src="@drawable/profile_image"
-        android:id="@+id/signUp_imageView_profile"
-        android:layout_margin="50dp"
-        android:layout_width="100dp"
-        android:layout_height="100dp"/>
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <RadioGroup
-            android:id="@+id/signUp_radioGroup"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <RadioButton
-                android:layout_marginRight="30dp"
-                android:id="@+id/signUp_man"
-                android:text="남자"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <RadioButton
-                android:layout_marginLeft="30dp"
-                android:id="@+id/signUp_woman"
-                android:text="여자"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </RadioGroup>
-    </LinearLayout>
     <EditText
         android:id="@+id/signUp_email_editText"
         android:inputType="textEmailAddress"
@@ -62,6 +34,7 @@
         <Button
             android:id="@+id/signUp_duplication"
             android:text="중복확인"
+            android:background="@drawable/custom_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
@@ -78,8 +51,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <Button
+        android:layout_marginTop="20dp"
         android:id="@+id/signUp_FinishButton"
         android:text="회원가입"
+        android:background="@drawable/custom_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 </LinearLayout>

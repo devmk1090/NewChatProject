@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.devkproject.newchatproject.AddFriendActivity;
 import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.model.User;
@@ -123,12 +122,6 @@ public class AddFriendListAdapter extends RecyclerView.Adapter<AddFriendListAdap
         });
 
         holder.userName.setText(friend.getUserNickname());
-
-        if(friend.getProfileImageUrl() != null) {
-            Glide.with(holder.itemView)
-                    .load(friend.getProfileImageUrl())
-                    .into(holder.imageView);
-        }
     }
 
     @Override

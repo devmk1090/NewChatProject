@@ -1,28 +1,23 @@
 package com.devkproject.newchatproject;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Color;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.devkproject.newchatproject.adapters.AddFriendListAdapter;
 import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,8 +26,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AddFriendActivity extends AppCompatActivity {
 
@@ -71,6 +64,8 @@ public class AddFriendActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("아이디로 친구 찾기");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setTitleTextColor(Color.WHITE);
+
 
         addFriendListAdapter = new AddFriendListAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -145,38 +140,6 @@ public class AddFriendActivity extends AppCompatActivity {
             }
         });
 
-    }
-
-    private void addFriendListener() {
-        friendRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                User friend = dataSnapshot.getValue(User.class);
-                if(friend.getRequestType().equals("")) {
-                    friendList.add(friend);
-                }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
     }
 
     @Override

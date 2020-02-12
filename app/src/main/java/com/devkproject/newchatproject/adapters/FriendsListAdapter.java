@@ -12,9 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.devkproject.newchatproject.R;
-import com.devkproject.newchatproject.model.Chat;
 import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -85,11 +83,6 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         final User friend = getItem(position);
 
         holder.user_name.setText(friend.getUserNickname());
-        if(friend.getProfileImageUrl() != null) {
-            Glide.with(holder.itemView)
-                    .load(friend.getProfileImageUrl())
-                    .into(holder.user_image);
-        }
         holder.rootView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {

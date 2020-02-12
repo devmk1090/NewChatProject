@@ -293,11 +293,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             } else {
                 holder.rcvUnreadCount.setText("");
             }
-            if(item.getMessageUser().getProfileImageUrl() != null) {
-                Glide.with(holder.yourArea)
-                        .load(item.getMessageUser().getProfileImageUrl())
-                        .into(holder.rcvProfileImage);
-            }
+
             if(item.getMessageType() == Message.MessageType.EXIT) {
                 holder.exitArea.setVisibility(View.VISIBLE);
                 holder.yourArea.setVisibility(View.GONE);
