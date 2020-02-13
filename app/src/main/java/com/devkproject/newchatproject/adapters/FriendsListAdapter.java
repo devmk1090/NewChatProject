@@ -88,13 +88,11 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
             public boolean onLongClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), 3);
                 builder.setTitle("친구를 삭제하시겠습니까?")
-                        .setIcon(R.drawable.ic_priority_high_black_24dp)
+                        .setIcon(R.drawable.ic_warning_black_24dp)
                         .setPositiveButton("예", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-
                                 removeItem(friend);
-
                                 friendRef.child(friend.getUid()).removeValue(new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {

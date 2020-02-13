@@ -213,7 +213,7 @@ public class ChatFragment extends Fragment {
         final DatabaseReference messageRef = mFirebaseDatabase.getReference("chat_messages").child(chat.getChatID());
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), 3);
         builder.setTitle("선택된 대화방을 나가시겠습니까?")
-                .setIcon(R.drawable.ic_priority_high_black_24dp)
+                .setIcon(R.drawable.ic_warning_black_24dp)
                 .setPositiveButton("예", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -244,11 +244,8 @@ public class ChatFragment extends Fragment {
                                     });
                                 }
                             }
-
                             @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
+                            public void onCancelled(@NonNull DatabaseError databaseError) {}
                         });
                         // users > {uid} > chats 나의 대화방 목록 제거
                         mChatRef.child(chat.getChatID()).removeValue(new DatabaseReference.CompletionListener() {

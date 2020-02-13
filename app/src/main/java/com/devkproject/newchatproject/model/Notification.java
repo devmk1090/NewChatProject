@@ -61,7 +61,7 @@ public class Notification  {
         mNotifyBuilder = new NotificationCompat.Builder(mContext, CHANNEL_ID);
         mNotifyBuilder.setVibrate(new long[] {1000, 1000});
         mNotifyBuilder.setPriority(100);
-        mNotifyBuilder.setSmallIcon(R.drawable.icon);
+        mNotifyBuilder.setSmallIcon(R.drawable.icon_heart);
         mNotifyBuilder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
     }
     public Notification setTitle(String title) {

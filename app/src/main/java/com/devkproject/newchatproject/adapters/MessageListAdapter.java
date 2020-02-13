@@ -16,12 +16,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.devkproject.newchatproject.ChatActivity;
 import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.model.AfterMessage;
 import com.devkproject.newchatproject.model.Message;
-import com.devkproject.newchatproject.model.PhotoMessage;
 import com.devkproject.newchatproject.model.TextMessage;
 import com.devkproject.newchatproject.model.User;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -112,12 +110,9 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         final Message item = getItem(position);
 
         TextMessage textMessage = null;
-        PhotoMessage photoMessage = null;
         AfterMessage afterMessage = null;
         if(item instanceof TextMessage) {
             textMessage = (TextMessage) item;
-        } else if (item instanceof PhotoMessage) {
-            photoMessage = (PhotoMessage) item;
         } else if (item instanceof AfterMessage) {
             afterMessage = (AfterMessage) item;
         }
@@ -127,14 +122,6 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             if(item.getMessageType() == Message.MessageType.TEXT) {
                 holder.sendTxt.setText(textMessage.getMessageText());
                 holder.sendTxt.setVisibility(View.VISIBLE);
-                holder.sendImage.setVisibility(View.GONE);
-            }
-            else if(item.getMessageType() == Message.MessageType.PHOTO) {
-                Glide.with(holder.sendArea)
-                        .load(photoMessage.getPhotoUrl())
-                        .into(holder.sendImage);
-                holder.sendTxt.setVisibility(View.GONE);
-                holder.sendImage.setVisibility(View.VISIBLE);
             }
             else if(item.getMessageType() == Message.MessageType.AFTER) {
                 holder.afterTxt.setText(item.getMessageUser().getUserNickname() + "님이 애프터 신청을 하셨습니다");
@@ -165,21 +152,13 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         else {
             // 상대방이 보낸 경우
             if(item.isAfterYes() == true) {
-                holder.rcvAfterImage.setVisibility(View.VISIBLE);
+                holder.afterYesImage.setVisibility(View.VISIBLE);
             } else {
-                holder.rcvAfterImage.setVisibility(View.GONE);
+                holder.afterYesImage.setVisibility(View.GONE);
             }
             if (item.getMessageType() == Message.MessageType.TEXT) {
                 holder.rcvTxt.setText(textMessage.getMessageText());
                 holder.rcvTxt.setVisibility(View.VISIBLE);
-                holder.rcvImage.setVisibility(View.GONE);
-
-            } else if (item.getMessageType() == Message.MessageType.PHOTO) {
-                Glide.with(holder.yourArea)
-                        .load(photoMessage.getPhotoUrl())
-                        .into(holder.rcvImage);
-                holder.rcvTxt.setVisibility(View.GONE);
-                holder.rcvImage.setVisibility(View.VISIBLE);
             } else if (item.getMessageType() == Message.MessageType.EXIT) {
                 holder.exitTxt.setText(item.getMessageUser().getUserNickname() + "님이 방에서 나가셨습니다");
             } else if (item.getMessageType() == Message.MessageType.AFTER) {
@@ -325,7 +304,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         private RelativeLayout afterArea;
         private CircleImageView rcvProfileImage;
         private TextView  rcvTxt, exitTxt, rcvUnreadCount, rcvDate, sendUnreadCount, sendDate, sendTxt, afterTxt;
-        private ImageView sendImage, rcvImage, sendAfterImage, rcvAfterImage;
+        private ImageView afterYesImage;
         private Button afterYesButton, afterNoButton;
 
         public MessageViewHolder(@NonNull View v) {
@@ -337,18 +316,15 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             rcvProfileImage = (CircleImageView) v.findViewById(R.id.rcvProfile);
             rcvTxt = (TextView) v.findViewById(R.id.rcvTxt);
             exitTxt = (TextView) v.findViewById(R.id.exitTxt);
-            rcvImage = (ImageView) v.findViewById(R.id.rcvImage);
             rcvUnreadCount = (TextView) v.findViewById(R.id.rcvUnreadCount);
             rcvDate = (TextView) v.findViewById(R.id.rcvDate);
             sendUnreadCount = (TextView) v.findViewById(R.id.sendUnreadCount);
             sendDate = (TextView) v.findViewById(R.id.sendDate);
             sendTxt = (TextView) v.findViewById(R.id.sendTxt);
-            sendImage = (ImageView) v.findViewById(R.id.sendImage);
             afterTxt = (TextView) v.findViewById(R.id.afterTxt);
             afterYesButton = (Button) v.findViewById(R.id.afterYesButton);
             afterNoButton = (Button) v.findViewById(R.id.afterNoButton);
-            sendAfterImage = (ImageView) v.findViewById(R.id.sendAfterImage);
-            rcvAfterImage = (ImageView) v.findViewById(R.id.rcvAfterImage);
+            afterYesImage = (ImageView) v.findViewById(R.id.afterYesImage);
         }
     }
 }

@@ -6,8 +6,9 @@
     <!-- 상대방-->
     <LinearLayout
         android:id="@+id/yourChatArea"
-        android:visibility="gone"
+        android:visibility="visible"
         android:padding="2dp"
+        android:layout_margin="2dp"
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -29,21 +30,9 @@
             android:layout_width="wrap_content"
             android:textSize="15dp"
             android:layout_height="wrap_content"/>
-        <ImageView
-            android:maxWidth="230dp"
-            android:maxHeight="230dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:id="@+id/rcvImage"
-            android:padding="3dp"
-            android:scaleType="fitCenter"
-            android:visibility="gone"
-            android:layout_gravity="center_vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
         <LinearLayout
             android:padding="2dp"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center"
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
@@ -62,12 +51,12 @@
                 android:textColor="#68747C"/>
         </LinearLayout>
         <ImageView
-            android:id="@+id/rcvAfterImage"
+            android:id="@+id/afterYesImage"
             android:visibility="visible"
-            android:src="@drawable/icon"
+            android:src="@drawable/icon_heart"
             android:layout_gravity="center"
-            android:layout_width="25dp"
-            android:layout_height="25dp"/>
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
     </LinearLayout>
 
     <!-- 방 나갔을때-->
@@ -95,17 +84,12 @@
     <LinearLayout
         android:id="@+id/myChatArea"
         android:padding="2dp"
+        android:layout_margin="2dp"
         android:layout_gravity="right"
         android:visibility="gone"
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
-        <ImageView
-            android:id="@+id/sendAfterImage"
-            android:visibility="gone"
-            android:src="@drawable/icon"
-            android:layout_width="25dp"
-            android:layout_height="25dp"/>
         <LinearLayout
             android:padding="2dp"
             android:layout_gravity="center_vertical"
@@ -140,22 +124,12 @@
             android:layout_width="wrap_content"
             android:textSize="15dp"
             android:layout_height="wrap_content"/>
-        <ImageView
-            android:maxWidth="250dp"
-            android:maxHeight="250dp"
-            android:visibility="gone"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:id="@+id/sendImage"
-            android:padding="3dp"
-            android:scaleType="fitCenter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
     </LinearLayout>
     <RelativeLayout
         android:id="@+id/afterArea"
         android:visibility="gone"
         android:padding="10dp"
+        android:layout_margin="2dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
@@ -173,6 +147,7 @@
             android:textSize="15dp"
             android:layout_height="wrap_content"/>
         <Button
+            android:background="@drawable/custom_afterbutton"
             android:visibility="visible"
             android:id="@+id/afterYesButton"
             android:layout_marginLeft="50dp"
@@ -182,6 +157,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
+            android:background="@drawable/custom_afterbutton"
             android:visibility="visible"
             android:id="@+id/afterNoButton"
             android:layout_marginRight="50dp"

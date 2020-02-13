@@ -76,22 +76,19 @@ public class FriendsFragment extends Fragment {
                 final User friend = friendsListAdapter.getItem(position);
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),3);
-                builder.setTitle(friend.getUserNickname() + "님과 대화를 하시겠습니까 ?");
-                builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
-                        chatIntent.putExtra("uid", friend.getUid());
-                      //  chatIntent.putExtra("chat_id",test);
-                        startActivityForResult(chatIntent, ChatFragment.JOIN_ROOM_REQUEST_CODE);
-                    }
-                }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                });
-                builder.show();
+                builder.setTitle(friend.getUserNickname() + "님과 대화를 하시겠습니까 ?")
+                        .setIcon(R.drawable.ic_chat_black_24dp)
+                        .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
+                                chatIntent.putExtra("uid", friend.getUid());
+                                //  chatIntent.putExtra("chat_id",test);
+                                startActivityForResult(chatIntent, ChatFragment.JOIN_ROOM_REQUEST_CODE);
+                            }
+                        })
+                        .setNegativeButton("아니오", null)
+                        .show();
             }
         }));
 

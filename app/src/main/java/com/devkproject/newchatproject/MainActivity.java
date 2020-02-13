@@ -15,11 +15,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.devkproject.newchatproject.fragment.ChatFragment;
 import com.devkproject.newchatproject.fragment.FriendsFragment;
 import com.devkproject.newchatproject.fragment.RequestFragment;
-import com.devkproject.newchatproject.model.Chat;
 import com.devkproject.newchatproject.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -30,12 +30,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
 
 public class MainActivity extends AppCompatActivity {
 
@@ -233,6 +228,9 @@ public class MainActivity extends AppCompatActivity {
                                             });
                                         }
                                     });
+                                } else {
+                                    Log.d(TAG, "회원 탈퇴 실패");
+                                    Toast.makeText(MainActivity.this, "잠시 후 다시 시도해 주세요", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });

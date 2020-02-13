@@ -9,9 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -24,12 +22,8 @@ import com.devkproject.newchatproject.fragment.ChatFragment;
 import com.devkproject.newchatproject.model.AfterMessage;
 import com.devkproject.newchatproject.model.Chat;
 import com.devkproject.newchatproject.model.Message;
-import com.devkproject.newchatproject.model.PhotoMessage;
 import com.devkproject.newchatproject.model.TextMessage;
 import com.devkproject.newchatproject.model.User;
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -41,9 +35,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.StorageTask;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +47,6 @@ import java.util.TimerTask;
 public class ChatActivity extends AppCompatActivity {
 
     private static final String TAG = "ChatActivity";
-    private static final int TAKE_PHOTO_REQUEST_CODE = 200;
 
     private String mChatID;
     private EditText chat_message;
@@ -70,8 +60,6 @@ public class ChatActivity extends AppCompatActivity {
     private DatabaseReference mChatMessageRef;
     private DatabaseReference mUserRef;
     private FirebaseUser mCurrentUser;
-    private StorageReference mImageStorageRef;
-    private StorageTask uploadTask;
     private FirebaseAnalytics mFirebaseAnalytics;
     private RecyclerView recyclerView;
     private MessageListAdapter messageListAdapter;
@@ -124,28 +112,17 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        final CharSequence[] category = {"사진 전송", "애프터 신청"};
         chat_side.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
-                builder.setTitle("선택하세요");
-                builder.setItems(category, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case 0:
-                                if(mChatID != null) {
-                                    Intent intent = new Intent();
-                                    intent.setAction(Intent.ACTION_GET_CONTENT);
-                                    intent.setType("image/*");
-                                    startActivityForResult(intent, TAKE_PHOTO_REQUEST_CODE);
-                                    break;
-                                } else {
-                                    Toast.makeText(ChatActivity.this, "대화를 먼저 나눈뒤 실행하세요", Toast.LENGTH_SHORT).show();
-                                }
-                            case 1:
-                                if(mChatID != null) {
+                builder.setTitle("애프터 신청")
+                        .setMessage("상대가 수락을 하면 \n상대가 거절을 하면")
+                        .setIcon(R.drawable.ic_favorite_border_black_24dp)
+                        .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (mChatID != null) {
                                     mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -165,17 +142,15 @@ public class ChatActivity extends AppCompatActivity {
 
                                         @Override
                                         public void onCancelled(@NonNull DatabaseError databaseError) {
-
                                         }
                                     });
-                                    break;
                                 } else {
                                     Toast.makeText(ChatActivity.this, "대화를 먼저 나눈뒤 실행하세요", Toast.LENGTH_SHORT).show();
                                 }
-                            default:
-                        }
-                    }
-                }).show();
+                            }
+                        })
+                        .setNegativeButton("아니오", null)
+                        .show();
             }
         });
     }
@@ -273,12 +248,7 @@ public class ChatActivity extends AppCompatActivity {
                             mutableReadUserList.add(mCurrentUser.getUid());
                             int mutableUnreadCount = mutableMessage.getUnreadCount() - 1;
 
-                            if(mutableMessage.getMessageType() == Message.MessageType.PHOTO) {
-                                PhotoMessage mutablePhotoMessage = mutableData.getValue(PhotoMessage.class);
-                                mutablePhotoMessage.setReadUserList(mutableReadUserList);
-                                mutablePhotoMessage.setUnreadCount(mutableUnreadCount);
-                                mutableData.setValue(mutablePhotoMessage);
-                            } else if(mutableMessage.getMessageType() == Message.MessageType.TEXT) {
+                            if(mutableMessage.getMessageType() == Message.MessageType.TEXT) {
                                 TextMessage mutableTextMessage = mutableData.getValue(TextMessage.class);
                                 mutableTextMessage.setReadUserList(mutableReadUserList);
                                 mutableTextMessage.setUnreadCount(mutableUnreadCount);
@@ -310,9 +280,6 @@ public class ChatActivity extends AppCompatActivity {
             if(item.getMessageType() == Message.MessageType.TEXT) {
                 TextMessage textMessage = dataSnapshot.getValue(TextMessage.class);
                 messageListAdapter.addItem(textMessage);
-            } else if (item.getMessageType() == Message.MessageType.PHOTO) {
-                PhotoMessage photoMessage = dataSnapshot.getValue(PhotoMessage.class);
-                messageListAdapter.addItem(photoMessage);
             } else if (item.getMessageType() == Message.MessageType.EXIT) {
                 messageListAdapter.addItem(item);
             } else if (item.getMessageType() == Message.MessageType.AFTER) {
@@ -334,9 +301,6 @@ public class ChatActivity extends AppCompatActivity {
             if(item.getMessageType() == Message.MessageType.TEXT) {
                 TextMessage textMessage = dataSnapshot.getValue(TextMessage.class);
                 messageListAdapter.updateItem(textMessage);
-            } else if (item.getMessageType() == Message.MessageType.PHOTO) {
-                PhotoMessage photoMessage = dataSnapshot.getValue(PhotoMessage.class);
-                messageListAdapter.updateItem(photoMessage);
             } else if (item.getMessageType() == Message.MessageType.AFTER) {
                 AfterMessage afterMessage = dataSnapshot.getValue(AfterMessage.class);
                 messageListAdapter.updateItem(afterMessage);
@@ -359,46 +323,8 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == TAKE_PHOTO_REQUEST_CODE) {
-            if(data != null) {
-                // 업로드 주소를 받아서 photoUrl 로 저장 > 포토메세지 발송
-                uploadImage(data.getData());
-            }
-        }
-    }
-
-    private String photoUrl = null;
-
     private Message.MessageType messageType = Message.MessageType.TEXT;
 
-    private void uploadImage(Uri data) {
-
-        if(mImageStorageRef == null) {
-            mImageStorageRef = FirebaseStorage.getInstance().getReference("/chats").child(mChatID);
-        }
-        uploadTask = mImageStorageRef.putFile(data);
-        uploadTask.continueWithTask(new Continuation() {
-            @Override
-            public Object then(@NonNull Task task) throws Exception {
-                if(!task.isSuccessful()) {
-                    throw task.getException();
-                }
-                return mImageStorageRef.getDownloadUrl();
-            }
-        }).addOnCompleteListener(new OnCompleteListener() {
-            @Override
-            public void onComplete(@NonNull Task task) {
-                if(task.isSuccessful()) {
-                    photoUrl = task.getResult().toString();
-                    messageType = Message.MessageType.PHOTO;
-                    sendMessage();
-                }
-            }
-        });
-    }
     private void AfterEvent() {
         DatabaseReference afterMessageRef = mFirebaseDB.getReference("chat_messages").child(mChatID);
         final AfterMessage afterMessage = new AfterMessage();
@@ -448,10 +374,6 @@ public class ChatActivity extends AppCompatActivity {
             }
             message = new TextMessage();
             ((TextMessage)message).setMessageText(messageText);
-        } else if (messageType == Message.MessageType.PHOTO) {
-            message = new PhotoMessage();
-            ((PhotoMessage)message).setPhotoUrl(photoUrl);
-            ((PhotoMessage)message).setMessageText("사진");
         }
 
         mChatMemberRef.child(mCurrentUser.getUid()).child("afterYes").addListenerForSingleValueEvent(new ValueEventListener() {
