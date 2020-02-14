@@ -21,6 +21,9 @@ import com.devkproject.newchatproject.fragment.ChatFragment;
 import com.devkproject.newchatproject.fragment.FriendsFragment;
 import com.devkproject.newchatproject.fragment.RequestFragment;
 import com.devkproject.newchatproject.model.User;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -45,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference userRef;
     private DatabaseReference mChatMemberRef;
     private DatabaseReference mChat;
+    private GoogleSignInClient mGoogleSignInClient;
 
 
     @Override
@@ -57,6 +61,12 @@ public class MainActivity extends AppCompatActivity {
         userRef = FirebaseDatabase.getInstance().getReference("users");
         mChatMemberRef = FirebaseDatabase.getInstance().getReference("chat_members");
         mChat = FirebaseDatabase.getInstance().getReference("chat_messages");
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar); // 툴바를 액티비티의 앱바로 지정
@@ -109,19 +119,13 @@ public class MainActivity extends AppCompatActivity {
                 toolbarHelp();
                 return true;
             case R.id.toolbar_logOut:
-                mAuth.signOut();
-                SendUserToLoginActivity();
+                SignOut();
                 return true;
             case R.id.toolbar_withdraw:
                 MemberWithdraw();
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-    private void SendUserToLoginActivity() {
-        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
-        loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(loginIntent);
     }
     private void SendAddFriendActivity() {
         Intent intent = new Intent(MainActivity.this, AddFriendActivity.class);
@@ -138,6 +142,31 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 }).show();
+    }
+    private void SignOut() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(R.drawable.ic_info_black_24dp)
+                .setTitle("로그아웃")
+                .setMessage("로그아웃 하시겠습니까?")
+                .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mAuth.signOut();
+                        mGoogleSignInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                SendUserToLoginActivity();
+                            }
+                        });
+                    }
+                })
+                .setNegativeButton("아니오", null)
+                .show();
+    }
+    private void SendUserToLoginActivity() {
+        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+        loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(loginIntent);
     }
     // [회원 탈퇴 로직]
     // 1.나의 계정 삭제

@@ -7,19 +7,12 @@
     android:orientation="vertical"
     android:gravity="center"
     android:layout_margin="10dp"
-    android:layout_marginBottom="50dp"
     tools:context=".RegisterActivity">
     <TextView
-        android:textSize="50dp"
-        android:text="회원가입"
+        android:textSize="25dp"
+        android:text="닉네임을 입력하세요"
         android:layout_marginBottom="50dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-    <EditText
-        android:id="@+id/signUp_email_editText"
-        android:inputType="textEmailAddress"
-        android:hint="이메일"
-        android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <LinearLayout
         android:orientation="horizontal"
@@ -38,22 +31,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
-    <EditText
-        android:id="@+id/signUp_password_editText"
-        android:inputType="textPassword"
-        android:hint="비밀번호"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <EditText
-        android:id="@+id/signUp_passwordConfirm_editText"
-        android:inputType="textPassword"
-        android:hint="비밀번호 확인"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
     <Button
         android:layout_marginTop="20dp"
         android:id="@+id/signUp_FinishButton"
-        android:text="회원가입"
+        android:text="설정 완료"
         android:background="@drawable/custom_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
