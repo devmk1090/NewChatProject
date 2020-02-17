@@ -13,7 +13,7 @@
     </androidx.appcompat.widget.Toolbar>
     <LinearLayout
         android:id="@+id/addFriend_layout"
-        android:layout_margin="5dp"
+        android:layout_margin="10dp"
         android:layout_below="@+id/addFriend_toolbar"
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -23,12 +23,13 @@
             android:id="@+id/addFriend_search_editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-        <Button
+        <ImageButton
             android:id="@+id/addFriend_search_button"
-            android:text="검색"
-            android:background="@drawable/custom_button"
+            android:src="@drawable/ic_search_black_24dp"
+            android:scaleType="centerCrop"
+            android:backgroundTint="#00FFFFFF"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="match_parent"/>
     </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/addFriend_recyclerView"

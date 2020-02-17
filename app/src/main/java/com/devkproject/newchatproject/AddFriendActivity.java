@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.devkproject.newchatproject.adapters.AddFriendListAdapter;
@@ -31,7 +32,7 @@ public class AddFriendActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private EditText searchText;
-    private Button searchButton;
+    private ImageButton searchButton;
     private RecyclerView recyclerView;
     private ArrayList<User> friendList;
 
@@ -57,7 +58,7 @@ public class AddFriendActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.addFriend_toolbar);
         searchText = (EditText) findViewById(R.id.addFriend_search_editText);
-        searchButton = (Button) findViewById(R.id.addFriend_search_button);
+        searchButton = (ImageButton) findViewById(R.id.addFriend_search_button);
         recyclerView = (RecyclerView) findViewById(R.id.addFriend_recyclerView);
         friendList = new ArrayList<>();
 

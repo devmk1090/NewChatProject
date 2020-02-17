@@ -11,9 +11,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-1646409874287424~2533943970" />
+
         <activity android:name=".AddFriendActivity"></activity>
         <activity android:name=".ChatActivity" />
-        <activity android:name=".RegisterActivity" />
+        <activity android:name=".RegisterActivity"/>
         <activity android:name=".MainActivity" />
         <activity android:name=".LoginActivity">
             <intent-filter>

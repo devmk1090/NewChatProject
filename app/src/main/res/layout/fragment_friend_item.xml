@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/friend_rootView"
-    android:layout_margin="5dp"
+    android:layout_margin="10dp"
+    android:background="@drawable/custom_friend_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <LinearLayout
         android:orientation="horizontal"
+        android:padding="5dp"
         android:layout_margin="5dp"
         android:gravity="center"
+        android:id="@+id/friend_linear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <de.hdodenhof.circleimageview.CircleImageView
@@ -17,13 +20,13 @@
             android:layout_height="60dp"/>
         <LinearLayout
             android:layout_weight="1"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="20dp"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
                 android:id="@+id/users_item_name"
-                android:text="user Name"
+                android:text="홍길동"
                 android:textStyle="bold"
                 android:textSize="20dp"
                 android:textAlignment="textStart"
@@ -31,25 +34,7 @@
                 android:layout_height="wrap_content"/>
         </LinearLayout>
         <Button
-            android:layout_marginLeft="10dp"
-            android:id="@+id/users_refuse_button"
-            android:visibility="gone"
-            android:text="거절"
-            android:background="@drawable/custom_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <Button
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="20dp"
-            android:id="@+id/users_accept_button"
-            android:visibility="gone"
-            android:text="수락"
-            android:background="@drawable/custom_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <Button
-            android:layout_marginRight="20dp"
+            android:layout_marginRight="10dp"
             android:id="@+id/users_request_button"
             android:visibility="gone"
             android:text="친구 신청"
@@ -57,4 +42,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
+    <Button
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/users_accept_button"
+        android:visibility="gone"
+        android:text="수락"
+        android:textStyle="bold"
+        android:background="@drawable/custom_button"
+        android:layout_below="@id/friend_linear"
+        android:layout_alignParentLeft="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="50dp"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/users_refuse_button"
+        android:visibility="gone"
+        android:text="거절"
+        android:textStyle="bold"
+        android:background="@drawable/custom_button"
+        android:layout_below="@id/friend_linear"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 </RelativeLayout>

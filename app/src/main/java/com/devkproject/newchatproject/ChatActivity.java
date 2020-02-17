@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -21,6 +22,7 @@ import com.devkproject.newchatproject.adapters.MessageListAdapter;
 import com.devkproject.newchatproject.fragment.ChatFragment;
 import com.devkproject.newchatproject.model.AfterMessage;
 import com.devkproject.newchatproject.model.Chat;
+import com.devkproject.newchatproject.model.ExitMessage;
 import com.devkproject.newchatproject.model.Message;
 import com.devkproject.newchatproject.model.TextMessage;
 import com.devkproject.newchatproject.model.User;
@@ -117,9 +119,11 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
                 builder.setTitle("애프터 신청")
-                        .setMessage("상대가 수락을 하면 \n상대가 거절을 하면")
+                        .setMessage("# 상대가 수락하면 서로의 채팅옆에 '하트'가 표시되며 계속 채팅을 이어갈 수 있습니다." +
+                                "\n\n" +
+                                "# 상대가 거절하면 상대방은 채팅방에서 자동으로 나가며 서로의 친구등록이 삭제됩니다.")
                         .setIcon(R.drawable.ic_favorite_border_black_24dp)
-                        .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                        .setPositiveButton("신청", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 if (mChatID != null) {
@@ -149,7 +153,7 @@ public class ChatActivity extends AppCompatActivity {
                                 }
                             }
                         })
-                        .setNegativeButton("아니오", null)
+                        .setNegativeButton("취소", null)
                         .show();
             }
         });
@@ -198,6 +202,7 @@ public class ChatActivity extends AppCompatActivity {
                 String title = dataSnapshot.getValue(String.class);
                 if(title != null) {
                     mToolbar.setTitle(title);
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                 }
             }
 
@@ -304,6 +309,9 @@ public class ChatActivity extends AppCompatActivity {
             } else if (item.getMessageType() == Message.MessageType.AFTER) {
                 AfterMessage afterMessage = dataSnapshot.getValue(AfterMessage.class);
                 messageListAdapter.updateItem(afterMessage);
+            } else {
+                ExitMessage exitMessage = dataSnapshot.getValue(ExitMessage.class);
+                messageListAdapter.updateItem(exitMessage);
             }
 
         }
@@ -317,7 +325,20 @@ public class ChatActivity extends AppCompatActivity {
 
     public void onSendEvent(View v) {
         if(mChatID != null) {
-            sendMessage();
+            mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    int i = (int) dataSnapshot.getChildrenCount();
+                    if(i > 1) {
+                        sendMessage();
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
         } else {
             createChat();
         }
@@ -334,7 +355,7 @@ public class ChatActivity extends AppCompatActivity {
         afterMessage.setMessageID(messageID);
         afterMessage.setChatID(mChatID);
         afterMessage.setAfterButton(true);
-        afterMessage.setMessageText(mCurrentUser.getDisplayName() + "님이 애프터 신청을 하셨습니다");
+        afterMessage.setMessageText("상대방이 애프터 신청을 수락했습니다");
         afterMessageRef.child(messageID).setValue(afterMessage);
 
         mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -512,5 +533,14 @@ public class ChatActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

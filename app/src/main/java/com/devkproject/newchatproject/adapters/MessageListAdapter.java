@@ -201,15 +201,17 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.afterNoButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-                        // 애프터 버튼 거절시 절차
+                        // 애프터 버튼 거절시 로직
                         // 1. user -> chats 삭제(실시간으로 방없어짐)
                         // 2. chat_messages 해당방의 메세지 모두 삭제
                         // 3. 상대방 -> chats 삭제
                         // 4. chat_members 삭제
-                        // 5. 나와 친구의 친구 등록 삭제
-                        AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                        builder.setMessage("채팅에서 나가집니다")
-                                .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                        // 5. 나와 상대방 친구 등록 삭제
+                        AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), 3);
+                        builder.setTitle("애프터 거절")
+                                .setIcon(R.drawable.ic_info_black_24dp)
+                                .setMessage("# 거절하면 채팅방에서 나가지며 \n채팅방과 친구등록이 삭제됩니다.")
+                                .setPositiveButton("거절", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         ((ChatActivity)v.getContext()).finish();
@@ -232,17 +234,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                                                                                 userRef.child(item.getMessageUser().getUid()).child("friends").child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
                                                                                     @Override
                                                                                     public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                                                                                        storageRef.child(item.getChatID()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                                                            @Override
-                                                                                            public void onSuccess(Void aVoid) {
-                                                                                                Log.d(TAG, "삭제 완료");
-                                                                                            }
-                                                                                        }).addOnFailureListener(new OnFailureListener() {
-                                                                                            @Override
-                                                                                            public void onFailure(@NonNull Exception e) {
-                                                                                                Log.d(TAG, String.valueOf(e));
-                                                                                            }
-                                                                                        });
+
                                                                                     }
                                                                                 });
                                                                             }
@@ -257,12 +249,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                                         });
                                     }
                                 })
-                                .setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                    }
-                                })
+                                .setNegativeButton("취소", null)
                                 .show();
                     }
                 });

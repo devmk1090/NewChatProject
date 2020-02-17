@@ -58,9 +58,7 @@ public class ChatFragment extends Fragment {
     public static final int JOIN_ROOM_REQUEST_CODE = 100;
     private Context mContext;
     private Notification mNotification;
-    private FirebaseAnalytics mFirebaseAnalytics;
     private DatabaseReference mChatMessageRef;
-    private StorageReference storageRef;
 
     public ChatFragment() {}
 
@@ -74,9 +72,7 @@ public class ChatFragment extends Fragment {
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mChatRef = mFirebaseDatabase.getReference("users").child(mCurrentUser.getUid()).child("chats");
         mChatMemberRef = mFirebaseDatabase.getReference("chat_members");
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
         mChatMessageRef = mFirebaseDatabase.getReference("chat_messages");
-        storageRef = FirebaseStorage.getInstance().getReference("/chats");
 
         chatRecyclerView = (RecyclerView) chatView.findViewById(R.id.chat_room_recyclerView);
         chatListAdapter = new ChatListAdapter();
@@ -218,7 +214,7 @@ public class ChatFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        // 대화방의 마지막 사람이 나가면 챗멤버 삭제 + 사진 삭제
+                        // 대화방의 마지막 사람이 나가면 챗멤버 삭제
                         mChatMemberRef.child(chat.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -229,17 +225,6 @@ public class ChatFragment extends Fragment {
                                         @Override
                                         public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
 
-                                            storageRef.child(chat.getChatID()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                @Override
-                                                public void onSuccess(Void aVoid) {
-                                                    Log.d(TAG, "삭제 완료");
-                                                }
-                                            }).addOnFailureListener(new OnFailureListener() {
-                                                @Override
-                                                public void onFailure(@NonNull Exception e) {
-                                                    e.printStackTrace();
-                                                }
-                                            });
                                         }
                                     });
                                 }

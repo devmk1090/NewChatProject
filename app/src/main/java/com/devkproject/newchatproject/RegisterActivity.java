@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,6 +25,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -46,6 +49,9 @@ public class RegisterActivity extends AppCompatActivity {
         mCurrentUser = mAuth.getCurrentUser();
 
         nickName = (EditText) findViewById(R.id.signUp_nick_editText);
+
+        SetEditText();
+
         signUp_FinishButton = (Button) findViewById(R.id.signUp_FinishButton);
         duplicationButton = (Button) findViewById(R.id.signUp_duplication);
 
@@ -123,5 +129,24 @@ public class RegisterActivity extends AppCompatActivity {
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(mainIntent);
         finish();
+    }
+    @Override
+    public void onBackPressed() {
+        return;
+    }
+
+    private void SetEditText() {
+        nickName.setFilters(new InputFilter[]{new InputFilter() {
+            @Override
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                Pattern ps = Pattern.compile("^[a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣ]");
+                if (!ps.matcher(source).matches()) {
+                    return "";
+                }
+                //Toast.makeText(RegisterActivity.this, "한글, 영문, 숫자만 입력 가능합니다", Toast.LENGTH_SHORT).show();
+                return null;
+            }
+        }});
+        nickName.setFilters(new InputFilter[]{new InputFilter.LengthFilter(8)});
     }
 }

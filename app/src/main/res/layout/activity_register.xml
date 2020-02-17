@@ -6,11 +6,31 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:layout_margin="10dp"
+    android:background="#FF6A95"
     tools:context=".RegisterActivity">
     <TextView
-        android:textSize="25dp"
-        android:text="닉네임을 입력하세요"
+        android:textSize="20dp"
+        android:layout_gravity="left"
+        android:layout_marginLeft="20dp"
+        android:text="# 특수문자는 사용할 수 없습니다"
+        android:textColor="#ffffff"
+        android:layout_marginBottom="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:textSize="20dp"
+        android:layout_gravity="left"
+        android:layout_marginLeft="20dp"
+        android:text="# 어플에서 친구 추가 용도로만 사용되며,"
+        android:textColor="#ffffff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:textSize="20dp"
+        android:layout_gravity="left"
+        android:layout_marginLeft="20dp"
+        android:text="구글 계정에는 영향을 끼치지 않습니다"
+        android:textColor="#ffffff"
         android:layout_marginBottom="50dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
@@ -21,10 +41,15 @@
         <EditText
             android:id="@+id/signUp_nick_editText"
             android:layout_weight="1"
-            android:hint="닉네임"
+            android:maxLength="10"
+            android:hint="8글자 내의 닉네임"
+            android:textColorHint="#ffffff"
+            android:layout_marginRight="20dp"
+            android:layout_marginLeft="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
         <Button
+            android:layout_marginRight="20dp"
             android:id="@+id/signUp_duplication"
             android:text="중복확인"
             android:background="@drawable/custom_button"
@@ -32,7 +57,7 @@
             android:layout_height="wrap_content"/>
     </LinearLayout>
     <Button
-        android:layout_marginTop="20dp"
+        android:layout_margin="20dp"
         android:id="@+id/signUp_FinishButton"
         android:text="설정 완료"
         android:background="@drawable/custom_button"
