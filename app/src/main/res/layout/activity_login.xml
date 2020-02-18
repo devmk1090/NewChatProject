@@ -8,17 +8,19 @@
     android:id="@+id/login_main_layout"
     tools:context=".LoginActivity">
     <LinearLayout
-        android:background="#7AE9FF"
-        android:layout_weight="3"
+        android:background="#00D4FF"
+        android:layout_weight="2"
         android:gravity="center"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:text="BLIND TALK"
+            android:text="블라인드 토크"
             android:textStyle="bold"
             android:textSize="30dp"
-            android:layout_marginBottom="20dp"
+            android:textColor="#000000"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="50dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <ImageView
@@ -30,13 +32,21 @@
         android:background="#94FF95"
         android:layout_weight="2"
         android:gravity="center"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <com.google.android.gms.common.SignInButton
-            android:id="@+id/login_signUp_Button"
-            android:layout_margin="25dp"
-            android:layout_width="250dp"
+            android:id="@+id/login_signUp_button"
+            android:layout_marginBottom="10dp"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"/>
+        <ImageButton
+            android:id="@+id/login_image_button"
+            android:src="@drawable/baseline_help_black_36dp"
+            android:backgroundTint="#00FFFFFF"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="5dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
 <!--    <LinearLayout-->

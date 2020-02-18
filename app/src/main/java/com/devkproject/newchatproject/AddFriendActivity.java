@@ -63,7 +63,7 @@ public class AddFriendActivity extends AppCompatActivity {
         friendList = new ArrayList<>();
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("아이디로 친구 찾기");
+        getSupportActionBar().setTitle("닉네임으로 친구 찾기");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setTitleTextColor(Color.WHITE);
 
@@ -84,11 +84,11 @@ public class AddFriendActivity extends AppCompatActivity {
     private void searchFriend() {
         getName = searchText.getText().toString();
         if(getName.isEmpty()) {
-            Toast.makeText(AddFriendActivity.this, "아이디를 입력해주세요", Toast.LENGTH_SHORT).show();
+            Toast.makeText(AddFriendActivity.this, "닉네임을 입력해주세요", Toast.LENGTH_SHORT).show();
             return;
         }
         if(getName.equals(mCurrentUser.getDisplayName())) {
-            Toast.makeText(AddFriendActivity.this, "자기 자신은 친구로 입력할 수 없습니다", Toast.LENGTH_SHORT).show();
+            Toast.makeText(AddFriendActivity.this, "자기 자신은 입력할 수 없습니다", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -98,7 +98,7 @@ public class AddFriendActivity extends AppCompatActivity {
                 for(DataSnapshot friendItem : dataSnapshot.getChildren()) {
                     User user = friendItem.getValue(User.class);
                     if (user.getUserNickname().equals(getName) && user.getRequestType().equals("")) {
-                        Toast.makeText(AddFriendActivity.this, "이미 등록된 친구입니다.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddFriendActivity.this, "이미 등록된 친구입니다", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     if(user.getUserNickname().equals(getName) && user.getRequestType().equals("sendRequest")) {
@@ -122,7 +122,7 @@ public class AddFriendActivity extends AppCompatActivity {
                                 addFriendListAdapter.addItem(currentUser);
                             } else {
                                 if(loopCount++ >= userCount) {
-                                    Toast.makeText(AddFriendActivity.this, "가입을 하지 않은 아이디입니다", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(AddFriendActivity.this, "가입하지 않은 닉네임입니다", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                             }

@@ -117,12 +117,11 @@ public class ChatActivity extends AppCompatActivity {
         chat_side.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this, R.style.MyAlertDialogStyle);
                 builder.setTitle("애프터 신청")
                         .setMessage("# 상대가 수락하면 서로의 채팅옆에 '하트'가 표시되며 계속 채팅을 이어갈 수 있습니다." +
                                 "\n\n" +
                                 "# 상대가 거절하면 상대방은 채팅방에서 자동으로 나가며 서로의 친구등록이 삭제됩니다.")
-                        .setIcon(R.drawable.ic_favorite_border_black_24dp)
                         .setPositiveButton("신청", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -355,7 +354,6 @@ public class ChatActivity extends AppCompatActivity {
         afterMessage.setMessageID(messageID);
         afterMessage.setChatID(mChatID);
         afterMessage.setAfterButton(true);
-        afterMessage.setMessageText("상대방이 애프터 신청을 수락했습니다");
         afterMessageRef.child(messageID).setValue(afterMessage);
 
         mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {

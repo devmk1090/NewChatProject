@@ -86,9 +86,8 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         holder.rootView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), 3);
-                builder.setTitle("친구를 삭제하시겠습니까?")
-                        .setIcon(R.drawable.ic_warning_black_24dp)
+                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), R.style.MyAlertDialogStyle);
+                builder.setMessage("친구를 삭제하시겠습니까?")
                         .setPositiveButton("예", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {

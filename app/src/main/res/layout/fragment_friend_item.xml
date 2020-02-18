@@ -38,6 +38,7 @@
             android:id="@+id/users_request_button"
             android:visibility="gone"
             android:text="친구 신청"
+            android:textColor="#FFFFFF"
             android:background="@drawable/custom_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -50,6 +51,7 @@
         android:visibility="gone"
         android:text="수락"
         android:textStyle="bold"
+        android:textColor="#FFFFFF"
         android:background="@drawable/custom_button"
         android:layout_below="@id/friend_linear"
         android:layout_alignParentLeft="true"
@@ -63,6 +65,7 @@
         android:visibility="gone"
         android:text="거절"
         android:textStyle="bold"
+        android:textColor="#FFFFFF"
         android:background="@drawable/custom_button"
         android:layout_below="@id/friend_linear"
         android:layout_alignParentRight="true"

@@ -2,12 +2,14 @@ package com.devkproject.newchatproject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.devkproject.newchatproject.model.User;
@@ -37,6 +39,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
     private LinearLayout login_main_layout;
+    private ImageButton login_image_button;
 
     private SignInButton signInButton;
     private GoogleSignInClient mGoogleSignInClient;
@@ -54,8 +57,9 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        signInButton = (SignInButton) findViewById(R.id.login_signUp_Button);
+        signInButton = (SignInButton) findViewById(R.id.login_signUp_button);
         login_main_layout = (LinearLayout) findViewById(R.id.login_main_layout);
+        login_image_button = (ImageButton) findViewById(R.id.login_image_button);
 
         mAuth = FirebaseAuth.getInstance();
         mCurrentUser = mAuth.getCurrentUser();
@@ -64,6 +68,13 @@ public class LoginActivity extends AppCompatActivity {
         if(mCurrentUser != null){
             SendUserToMainActivity();
         }
+
+        login_image_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClickImageButton();
+            }
+        });
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -154,5 +165,13 @@ public class LoginActivity extends AppCompatActivity {
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(mainIntent);
         finish();
+    }
+    private void ClickImageButton() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
+        builder.setMessage("# 어플내의 닉네임을 따로 설정하여 사용하기 때문에 " +
+                        "서로의 구글 계정 정보를 알 수 없습니다.")
+                .setPositiveButton("확인", null)
+                .setTitle("알림")
+                .show();
     }
 }

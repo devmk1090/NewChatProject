@@ -75,9 +75,8 @@ public class FriendsFragment extends Fragment {
             public void onItemClick(View view, int position) {
                 final User friend = friendsListAdapter.getItem(position);
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),3);
-                builder.setTitle(friend.getUserNickname() + "님과 대화를 하시겠습니까 ?")
-                        .setIcon(R.drawable.ic_chat_black_24dp)
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
+                builder.setMessage(friend.getUserNickname() + "님과 대화하시겠습니까 ?")
                         .setPositiveButton("예", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -93,21 +92,6 @@ public class FriendsFragment extends Fragment {
         }));
 
         return friendsView;
-    }
-    private void chatMember() {
-        mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot item : dataSnapshot.getChildren()) {
-                    String key = item.getKey();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void addFriendListener() {
@@ -136,6 +120,21 @@ public class FriendsFragment extends Fragment {
             @Override
             public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+    private void chatMember() {
+        mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot item : dataSnapshot.getChildren()) {
+                    String key = item.getKey();
+                }
             }
 
             @Override

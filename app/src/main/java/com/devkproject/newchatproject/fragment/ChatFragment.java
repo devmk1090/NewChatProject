@@ -207,9 +207,8 @@ public class ChatFragment extends Fragment {
 
     public void leaveChat(final Chat chat) {
         final DatabaseReference messageRef = mFirebaseDatabase.getReference("chat_messages").child(chat.getChatID());
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), 3);
-        builder.setTitle("선택된 대화방을 나가시겠습니까?")
-                .setIcon(R.drawable.ic_warning_black_24dp)
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
+        builder.setMessage("선택된 대화방을 나가시겠습니까?")
                 .setPositiveButton("예", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

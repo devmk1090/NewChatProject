@@ -149,9 +149,8 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
     private void toolbarHelp() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
         builder.setTitle("도움말")
-                .setIcon(R.drawable.ic_help_black_24dp)
                 .setMessage("# 친구 신청 : 상단 오른쪽의 사람 아이콘을 클릭하고 상대방의 닉네임을 검색 후 친구신청 아이콘 클릭" +
                         "\n\n" +
                         "# 친구 추가 : 상대방이 친구 신청을 했다면 '요청' 탭에서 수락 클릭" +
@@ -167,9 +166,8 @@ public class MainActivity extends AppCompatActivity {
                 }).show();
     }
     private void SignOut() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.drawable.ic_info_black_24dp)
-                .setTitle("로그아웃")
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
+        builder.setTitle("로그아웃")
                 .setMessage("로그아웃 하시겠습니까 ?")
                 .setPositiveButton("예", new DialogInterface.OnClickListener() {
                     @Override
@@ -199,12 +197,9 @@ public class MainActivity extends AppCompatActivity {
     // 4.chat_members 에서 나를 삭제
     // 5.상대방 친구 목록에서 나를 삭제
     private void MemberWithdraw() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.drawable.ic_warning_black_24dp)
-                .setTitle("회원 탈퇴")
-                .setMessage("# 탈퇴 로직 설명" +
-                        "\n" +
-                        "1.어플에 등록된 계정 삭제" +
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
+        builder.setTitle("회원 탈퇴 설명")
+                .setMessage("1.어플에 등록된 구글 계정 삭제" +
                         "\n" +
                         "2.데이터베이스에 있는 나의 정보 삭제" +
                         "\n" +
@@ -216,9 +211,8 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("탈퇴", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
-                        builder1.setIcon(R.drawable.ic_warning_black_24dp)
-                                .setTitle("정말 탈퇴하시겠습니까 ?")
+                        AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this, R.style.MyAlertDialogStyle);
+                        builder1.setMessage("정말 탈퇴하시겠습니까 ?")
                                 .setPositiveButton("예", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
@@ -313,10 +307,9 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     public void onBackPressed() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
         builder.setTitle("알림")
                 .setMessage("죵료하시겠습니까 ?")
-                .setIcon(R.drawable.ic_info_black_24dp)
                 .setPositiveButton("예", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

@@ -2,7 +2,6 @@ package com.devkproject.newchatproject.adapters;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,8 +21,6 @@ import com.devkproject.newchatproject.model.AfterMessage;
 import com.devkproject.newchatproject.model.Message;
 import com.devkproject.newchatproject.model.TextMessage;
 import com.devkproject.newchatproject.model.User;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -128,6 +125,12 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.afterTxt.setVisibility(View.VISIBLE);
                 holder.afterYesButton.setVisibility(View.GONE);
                 holder.afterNoButton.setVisibility(View.GONE);
+                holder.afterYesTxt.setVisibility(View.GONE);
+                if(item.getMessageUser().isAfterCount() == true) {
+                    holder.afterYesTxt.setVisibility(View.VISIBLE);
+                    holder.afterYesTxt.setText("상대방이 애프터 신청을 수락하셨습니다\n" +
+                            "축하합니다 !");
+                }
             }
             if(item.getUnreadCount() > 0) {
                 holder.sendUnreadCount.setText(String.valueOf(item.getUnreadCount()));
@@ -166,12 +169,13 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.afterTxt.setVisibility(View.VISIBLE);
                 holder.afterYesButton.setVisibility(View.VISIBLE);
                 holder.afterNoButton.setVisibility(View.VISIBLE);
+                holder.afterYesTxt.setVisibility(View.GONE);
                 if(item.getMessageUser().isAfterCount() == false) {
                     holder.afterYesButton.setEnabled(true);
                     holder.afterNoButton.setEnabled(true);
                 } else {
-                    holder.afterYesButton.setEnabled(false);
-                    holder.afterNoButton.setEnabled(false);
+                    holder.afterYesButton.setVisibility(View.GONE);
+                    holder.afterNoButton.setVisibility(View.GONE);
                 }
                 holder.afterYesButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -207,10 +211,9 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                         // 3. 상대방 -> chats 삭제
                         // 4. chat_members 삭제
                         // 5. 나와 상대방 친구 등록 삭제
-                        AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), 3);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), R.style.MyAlertDialogStyle);
                         builder.setTitle("애프터 거절")
-                                .setIcon(R.drawable.ic_info_black_24dp)
-                                .setMessage("# 거절하면 채팅방에서 나가지며 \n채팅방과 친구등록이 삭제됩니다.")
+                                .setMessage("# 거절하면 해당 채팅방에서 나가지며\n친구등록이 즉시 삭제됩니다")
                                 .setPositiveButton("거절", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
@@ -290,7 +293,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         private LinearLayout yourArea, sendArea, exitArea;
         private RelativeLayout afterArea;
         private CircleImageView rcvProfileImage;
-        private TextView  rcvTxt, exitTxt, rcvUnreadCount, rcvDate, sendUnreadCount, sendDate, sendTxt, afterTxt;
+        private TextView  rcvTxt, exitTxt, rcvUnreadCount, rcvDate, sendUnreadCount, sendDate, sendTxt, afterTxt, afterYesTxt;
         private ImageView afterYesImage;
         private Button afterYesButton, afterNoButton;
 
@@ -312,6 +315,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             afterYesButton = (Button) v.findViewById(R.id.afterYesButton);
             afterNoButton = (Button) v.findViewById(R.id.afterNoButton);
             afterYesImage = (ImageView) v.findViewById(R.id.afterYesImage);
+            afterYesTxt = (TextView) v.findViewById(R.id.afterYesTxt);
         }
     }
 }
