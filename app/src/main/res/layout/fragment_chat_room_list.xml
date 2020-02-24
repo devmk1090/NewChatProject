@@ -49,6 +49,7 @@
         <TextView
             android:id="@+id/chat_item_totalUnreadCounter"
             android:text="Unread"
+            android:textColor="#FF0000"
             android:maxLines="1"
             android:layout_gravity="start"
             android:layout_marginBottom="5dp"

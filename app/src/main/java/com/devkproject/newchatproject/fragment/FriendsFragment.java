@@ -22,7 +22,6 @@ import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.adapters.FriendsListAdapter;
 import com.devkproject.newchatproject.customviews.RecyclerViewItemClickListener;
 import com.devkproject.newchatproject.model.User;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -38,15 +37,13 @@ public class FriendsFragment extends Fragment {
     private static final String TAG = "FriendsFragment";
 
     private FirebaseAuth mAuth;
-    private FirebaseUser mUser;
+    private FirebaseUser mCurrentUser;
     private DatabaseReference userRef;
     private DatabaseReference friendsRef;
-    private FirebaseAnalytics mFirebaseAnalytics;
     private DatabaseReference mChatMemberRef;
 
     private RecyclerView recyclerView;
     private FriendsListAdapter friendsListAdapter;
-    //private String test = "-M-oytdAyCntwEWmTaJH";
 
     public FriendsFragment() {}
 
@@ -59,9 +56,8 @@ public class FriendsFragment extends Fragment {
         recyclerView = (RecyclerView) friendsView.findViewById(R.id.friends_recyclerView);
 
         mAuth = FirebaseAuth.getInstance();
-        mUser = mAuth.getCurrentUser();
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
-        friendsRef = FirebaseDatabase.getInstance().getReference("users").child(mUser.getUid()).child("friends");
+        mCurrentUser = mAuth.getCurrentUser();
+        friendsRef = FirebaseDatabase.getInstance().getReference("users").child(mCurrentUser.getUid()).child("friends");
         userRef = FirebaseDatabase.getInstance().getReference("users");
         mChatMemberRef = FirebaseDatabase.getInstance().getReference("chat_members");
 
@@ -80,7 +76,29 @@ public class FriendsFragment extends Fragment {
                         .setPositiveButton("예", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
+//                                mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//                                    @Override
+//                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                                        if(dataSnapshot.exists()) {
+//                                            for (DataSnapshot item : dataSnapshot.getChildren()) {
+//                                                User user = item.getValue(User.class);
+//                                                if(user.isContinueChat() == false) {
+//
+//                                                } else {
+//
+//                                                }
+//                                            }
+//                                        } else {
+//                                            return;
+//                                        }
+//                                    }
+//
+//                                    @Override
+//                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                                    }
+//                                });
+                                final Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
                                 chatIntent.putExtra("uid", friend.getUid());
                                 //  chatIntent.putExtra("chat_id",test);
                                 startActivityForResult(chatIntent, ChatFragment.JOIN_ROOM_REQUEST_CODE);
@@ -120,21 +138,6 @@ public class FriendsFragment extends Fragment {
             @Override
             public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-    private void chatMember() {
-        mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot item : dataSnapshot.getChildren()) {
-                    String key = item.getKey();
-                }
             }
 
             @Override

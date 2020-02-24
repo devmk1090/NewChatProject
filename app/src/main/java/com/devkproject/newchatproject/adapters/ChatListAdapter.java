@@ -69,10 +69,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatHo
         return -1;
     }
 
-    public Chat getItem(String chatID) {
-        return getItem(getItemPosition(chatID));
-    }
-
     @NonNull
     @Override
     public ChatHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

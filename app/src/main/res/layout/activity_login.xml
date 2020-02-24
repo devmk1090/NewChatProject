@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:text="블라인드 토크"
+            android:text="쏘 쿨 !"
             android:textStyle="bold"
             android:textSize="30dp"
             android:textColor="#000000"

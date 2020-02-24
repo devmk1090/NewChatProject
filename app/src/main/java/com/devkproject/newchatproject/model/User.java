@@ -5,8 +5,11 @@ public class User {
     private String userEmail;
     private String userNickname;
     private String requestType;
+    private String deviceToken;
     private boolean afterCount;
     private boolean afterYes;
+    private boolean continueChat;
+    private boolean status;
 
     public User(){}
 
@@ -51,5 +54,23 @@ public class User {
     }
     public void setAfterYes(boolean afterYes) {
         this.afterYes = afterYes;
+    }
+    public String getDeviceToken() {
+        return deviceToken;
+    }
+    public void setDeviceToken(String deviceToken) {
+        this.deviceToken = deviceToken;
+    }
+    public boolean isContinueChat() {
+        return continueChat;
+    }
+    public void setContinueChat(boolean continueChat) {
+        this.continueChat = continueChat;
+    }
+    public boolean isStatus() {
+        return status;
+    }
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 }

@@ -19,18 +19,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.devkproject.newchatproject.ChatActivity;
-import com.devkproject.newchatproject.MainActivity;
 import com.devkproject.newchatproject.R;
 import com.devkproject.newchatproject.adapters.ChatListAdapter;
 import com.devkproject.newchatproject.customviews.RecyclerViewItemClickListener;
 import com.devkproject.newchatproject.model.Chat;
 import com.devkproject.newchatproject.model.ExitMessage;
 import com.devkproject.newchatproject.model.Message;
-import com.devkproject.newchatproject.model.Notification;
+import com.devkproject.newchatproject.model.NotificationModel;
 import com.devkproject.newchatproject.model.User;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -39,26 +35,35 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 
 public class ChatFragment extends Fragment {
 
     private static final String TAG = "ChatFragment";
     private FirebaseUser mCurrentUser;
     private FirebaseDatabase mFirebaseDatabase;
-    private DatabaseReference mChatRef;
+    private DatabaseReference mUserChatRef;
     private DatabaseReference mChatMemberRef;
     private RecyclerView chatRecyclerView;
     private ChatListAdapter chatListAdapter;
     public static String JOINED_ROOM = "";
     public static final int JOIN_ROOM_REQUEST_CODE = 100;
     private Context mContext;
-    private Notification mNotification;
     private DatabaseReference mChatMessageRef;
+    private DatabaseReference userRef;
 
     public ChatFragment() {}
 
@@ -70,9 +75,10 @@ public class ChatFragment extends Fragment {
 
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mChatRef = mFirebaseDatabase.getReference("users").child(mCurrentUser.getUid()).child("chats");
+        mUserChatRef = mFirebaseDatabase.getReference("users").child(mCurrentUser.getUid()).child("chats");
         mChatMemberRef = mFirebaseDatabase.getReference("chat_members");
         mChatMessageRef = mFirebaseDatabase.getReference("chat_messages");
+        userRef = mFirebaseDatabase.getReference("users");
 
         chatRecyclerView = (RecyclerView) chatView.findViewById(R.id.chat_room_recyclerView);
         chatListAdapter = new ChatListAdapter();
@@ -89,14 +95,13 @@ public class ChatFragment extends Fragment {
             }
         }));
         mContext = getActivity();
-        mNotification = new Notification(mContext);
 
         addChatListener();
         return chatView;
     }
 
     private void addChatListener() {
-        mChatRef.addChildEventListener(new ChildEventListener() {
+        mUserChatRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot chatDataSnapshot, @Nullable String s) {
                 drawUI(chatDataSnapshot, DrawType.ADD);
@@ -106,9 +111,8 @@ public class ChatFragment extends Fragment {
                 // 변경된 방의 정보를 실시간 수신하는 코드
                 // 내가 보낸 메세지가 아닐 경우와 마지막 메세지가 수정이 되었다면 -> 노티출력
                 // 현재 액티비티가 ChatActivity 이고 chat_id 가 같다면 노티x
-
                 drawUI(chatDataSnapshot, DrawType.UPDATE);
-                Chat updatedChat = chatDataSnapshot.getValue(Chat.class);
+                final Chat updatedChat = chatDataSnapshot.getValue(Chat.class);
 
                 // totalUnread 의 변경, title 의 변경, lastMessage 변경시에 호출됨
                 if (updatedChat.getLastMessage() != null) {
@@ -117,14 +121,7 @@ public class ChatFragment extends Fragment {
                     }
                     if (!updatedChat.getLastMessage().getMessageUser().getUid().equals(mCurrentUser.getUid())) {
                         if (!updatedChat.getChatID().equals(JOINED_ROOM)) {
-                            // notification code
-                            Intent chatIntent = new Intent (mContext, ChatActivity.class);
-                            chatIntent.putExtra("chat_id", updatedChat.getChatID());
-                            mNotification
-                                    .setData(chatIntent)
-                                    .setTitle(updatedChat.getLastMessage().getMessageUser().getUserNickname())
-                                    .setText(updatedChat.getLastMessage().getMessageText())
-                                    .notification();
+
                         }
                     }
                 }
@@ -146,6 +143,52 @@ public class ChatFragment extends Fragment {
         });
     }
 
+    private void sendFcm(Chat chat) {
+        mChatMemberRef.child(chat.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot item : dataSnapshot.getChildren()) {
+                    User user = item.getValue(User.class);
+                    if (!mCurrentUser.getUid().equals(user.getUid())) {
+                        String token = user.getDeviceToken();
+                        Log.d(TAG, token);
+                        Gson gson = new Gson();
+                        final MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+
+                        NotificationModel notificationModel = new NotificationModel();
+                        notificationModel.to = token;
+                        notificationModel.data.title = mCurrentUser.getDisplayName();
+                        notificationModel.data.text = "메시지가 도착했습니다";
+
+                        RequestBody body = RequestBody.create(mediaType, gson.toJson(notificationModel));
+                        Request request = new Request.Builder()
+                                .url("https://fcm.googleapis.com/fcm/send")
+                                .header("Content-Type", "application/json")
+                                .addHeader("Authorization", "key=AAAAW99exTw:APA91bFhQZjaCxnlkNrx4RgbP0YMbXyh-F-Va4y7mJp5lr8p17WVprO4gH53wF97aH_dYY_eK-m0qAC0s6dMYEjqnOghvaoqlq5kLnKacVliLNpvpGcDJ0CUbPfFEopRVErjt9UEZQdv")
+                                .post(body)
+                                .build();
+                        OkHttpClient okHttpClient = new OkHttpClient();
+                        okHttpClient.newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     private void drawUI(final DataSnapshot chatDataSnapshot, final DrawType drawType) {
 
@@ -232,7 +275,7 @@ public class ChatFragment extends Fragment {
                             public void onCancelled(@NonNull DatabaseError databaseError) {}
                         });
                         // users > {uid} > chats 나의 대화방 목록 제거
-                        mChatRef.child(chat.getChatID()).removeValue(new DatabaseReference.CompletionListener() {
+                        mUserChatRef.child(chat.getChatID()).removeValue(new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                                 // chat_members > {chat_id} > {user_id} 채팅 멤버 목록에서 제거

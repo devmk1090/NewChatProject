@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -24,9 +25,9 @@ import com.devkproject.newchatproject.model.AfterMessage;
 import com.devkproject.newchatproject.model.Chat;
 import com.devkproject.newchatproject.model.ExitMessage;
 import com.devkproject.newchatproject.model.Message;
+import com.devkproject.newchatproject.model.NotificationModel;
 import com.devkproject.newchatproject.model.TextMessage;
 import com.devkproject.newchatproject.model.User;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -37,7 +38,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -45,6 +48,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -62,7 +73,6 @@ public class ChatActivity extends AppCompatActivity {
     private DatabaseReference mChatMessageRef;
     private DatabaseReference mUserRef;
     private FirebaseUser mCurrentUser;
-    private FirebaseAnalytics mFirebaseAnalytics;
     private RecyclerView recyclerView;
     private MessageListAdapter messageListAdapter;
 
@@ -83,7 +93,6 @@ public class ChatActivity extends AppCompatActivity {
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         mUserRef = mFirebaseDB.getReference("users");
         mChatID = getIntent().getStringExtra("chat_id");
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         setSupportActionBar(mToolbar);
         mToolbar.setTitleTextColor(Color.WHITE);
@@ -164,11 +173,14 @@ public class ChatActivity extends AppCompatActivity {
         if(mChatID != null) {
             removeMessageListener();
         }
+        mUserRef.child(mCurrentUser.getUid()).child("status").setValue(false);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        mUserRef.child(mCurrentUser.getUid()).child("status").setValue(true);
+
         if(mChatID != null) {
             // 총 메세지의 카운터를 가져온다
             // onChildAdded 에서 호출한 변수의 값이 총메세지의 값과 크거나 같다면, 포커스를 맨아래로 내려준다
@@ -212,7 +224,6 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    MessageEventListener mMessageEventListener = new MessageEventListener();
 
     private void removeMessageListener() {
         mChatMessageRef.removeEventListener(mMessageEventListener);
@@ -221,6 +232,8 @@ public class ChatActivity extends AppCompatActivity {
     private void addMessageListener() {
         mChatMessageRef.addChildEventListener(mMessageEventListener);
     }
+
+    MessageEventListener mMessageEventListener = new MessageEventListener();
 
     private class MessageEventListener implements ChildEventListener {
 
@@ -268,6 +281,7 @@ public class ChatActivity extends AppCompatActivity {
 
                         @Override
                         public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+                            Log.d(TAG, String.valueOf(dataSnapshot));
                             // 읽는 순간 0 으로 초기화.
                             // Timer, TimeTask 를 이용하여 0.5초 딜레이를 준다
                             new Timer().schedule(new TimerTask() {
@@ -302,6 +316,7 @@ public class ChatActivity extends AppCompatActivity {
             // 변경된 메세지 ex)unreadCount
             // 어댑터쪽에 변경된 메세지 데이터를 전달하고 메세지 아이디 번호로 해당 메세지의 위치를 알아내서 메세지 리스트의 값을 변경한다
             Message item = dataSnapshot.getValue(Message.class);
+
             if(item.getMessageType() == Message.MessageType.TEXT) {
                 TextMessage textMessage = dataSnapshot.getValue(TextMessage.class);
                 messageListAdapter.updateItem(textMessage);
@@ -323,6 +338,28 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void onSendEvent(View v) {
+//        mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                if(dataSnapshot.exists()) {
+//                    for (DataSnapshot item : dataSnapshot.getChildren()) {
+//                        User user = item.getValue(User.class);
+//                        if(user.isContinueChat() == true) {
+//                            sendMessage();
+//                        } else {
+//                            createChat();
+//                        }
+//                    }
+//                } else {
+//                    return;
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
         if(mChatID != null) {
             mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -330,6 +367,7 @@ public class ChatActivity extends AppCompatActivity {
                     int i = (int) dataSnapshot.getChildrenCount();
                     if(i > 1) {
                         sendMessage();
+                        fcmListener();
                     }
                 }
                 @Override
@@ -354,6 +392,7 @@ public class ChatActivity extends AppCompatActivity {
         afterMessage.setMessageID(messageID);
         afterMessage.setChatID(mChatID);
         afterMessage.setAfterButton(true);
+        afterMessage.setMessageText("(애프터 메세지)");
         afterMessageRef.child(messageID).setValue(afterMessage);
 
         mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -380,6 +419,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private Message message = new Message();
+
     private void sendMessage() {
         // 메세지 키 생성
         mChatMessageRef = mFirebaseDB.getReference("chat_messages").child(mChatID);
@@ -431,7 +471,6 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
 
-
                         Iterator<DataSnapshot> memberIterator = dataSnapshot.getChildren().iterator();
                         while(memberIterator.hasNext()) {
                             // 대화 상대 한명한명 돌면서 정보를 읽는다
@@ -451,10 +490,11 @@ public class ChatActivity extends AppCompatActivity {
                                         .runTransaction(new Transaction.Handler() {
                                             @NonNull
                                             @Override
-                                            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                                            public Transaction.Result doTransaction(@NonNull final MutableData mutableData) {
                                                 // 삼항연산자 : 값이 null 일때 true > 0 , false > mutableData.getValue(long.class) 를 넣어준다
                                                 long totalUnreadCount = mutableData.getValue(long.class) == null ? 0 : mutableData.getValue(long.class);
                                                 mutableData.setValue(totalUnreadCount + 1);
+
                                                 return Transaction.success(mutableData);
                                             }
 
@@ -540,5 +580,82 @@ public class ChatActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void fcmListener() {
+        mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot item : dataSnapshot.getChildren()) {
+                    User userItem = item.getValue(User.class);
+                    if(!userItem.getUid().equals(mCurrentUser.getUid())) {
+                        mUserRef.child(userItem.getUid()).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                if(dataSnapshot.getValue().equals(false)) {
+                                    sendFcm();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void sendFcm() {
+        mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot item : dataSnapshot.getChildren()) {
+                    User user = item.getValue(User.class);
+                    if (!mCurrentUser.getUid().equals(user.getUid())) {
+                        String token = user.getDeviceToken();
+                        Gson gson = new Gson();
+                        final MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+
+                        NotificationModel notificationModel = new NotificationModel();
+                        notificationModel.to = token;
+                        notificationModel.data.title = mCurrentUser.getDisplayName();
+                        notificationModel.data.text = "메시지가 도착했습니다";
+
+                        RequestBody body = RequestBody.create(mediaType, gson.toJson(notificationModel));
+                        Request request = new Request.Builder()
+                                .url("https://fcm.googleapis.com/fcm/send")
+                                .header("Content-Type", "application/json")
+                                .addHeader("Authorization", "key=AAAAW99exTw:APA91bFhQZjaCxnlkNrx4RgbP0YMbXyh-F-Va4y7mJp5lr8p17WVprO4gH53wF97aH_dYY_eK-m0qAC0s6dMYEjqnOghvaoqlq5kLnKacVliLNpvpGcDJ0CUbPfFEopRVErjt9UEZQdv")
+                                .post(body)
+                                .build();
+                        OkHttpClient okHttpClient = new OkHttpClient();
+                        okHttpClient.newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 }
