@@ -138,10 +138,12 @@ public class ChatActivity extends AppCompatActivity {
                                     mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            int i = (int) dataSnapshot.getChildrenCount();
                                             for (DataSnapshot friendItem : dataSnapshot.getChildren()) {
                                                 User friendUser = friendItem.getValue(User.class);
-                                                if (!friendUser.getUid().equals(mCurrentUser.getUid()) && friendUser.isAfterCount() == true) {
+                                                if (!friendUser.getUid().equals(mCurrentUser.getUid()) && friendUser.isAfterCount() == true && i > 1) {
                                                     AfterEvent();
+                                                    fcmListener();
                                                     mChatMemberRef.child(friendUser.getUid()).child("afterCount").setValue(false);
                                                     return;
                                                 }
@@ -212,7 +214,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String title = dataSnapshot.getValue(String.class);
                 if(title != null) {
-                    mToolbar.setTitle(title);
+                    mToolbar.setTitle(title+ "님과 대화중");
                     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                 }
             }
@@ -281,7 +283,6 @@ public class ChatActivity extends AppCompatActivity {
 
                         @Override
                         public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
-                            Log.d(TAG, String.valueOf(dataSnapshot));
                             // 읽는 순간 0 으로 초기화.
                             // Timer, TimeTask 를 이용하여 0.5초 딜레이를 준다
                             new Timer().schedule(new TimerTask() {
@@ -589,11 +590,39 @@ public class ChatActivity extends AppCompatActivity {
                 for(DataSnapshot item : dataSnapshot.getChildren()) {
                     User userItem = item.getValue(User.class);
                     if(!userItem.getUid().equals(mCurrentUser.getUid())) {
+                        final String token = userItem.getDeviceToken();
+                        Log.d(TAG, token);
                         mUserRef.child(userItem.getUid()).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 if(dataSnapshot.getValue().equals(false)) {
-                                    sendFcm();
+                                    Gson gson = new Gson();
+                                    final MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+
+                                    NotificationModel notificationModel = new NotificationModel();
+                                    notificationModel.to = token;
+                                    notificationModel.data.title = mCurrentUser.getDisplayName();
+                                    notificationModel.data.text = "메시지가 도착했습니다";
+
+                                    RequestBody body = RequestBody.create(mediaType, gson.toJson(notificationModel));
+                                    Request request = new Request.Builder()
+                                            .url("https://fcm.googleapis.com/fcm/send")
+                                            .header("Content-Type", "application/json")
+                                            .addHeader("Authorization", "key=AAAAW99exTw:APA91bFhQZjaCxnlkNrx4RgbP0YMbXyh-F-Va4y7mJp5lr8p17WVprO4gH53wF97aH_dYY_eK-m0qAC0s6dMYEjqnOghvaoqlq5kLnKacVliLNpvpGcDJ0CUbPfFEopRVErjt9UEZQdv")
+                                            .post(body)
+                                            .build();
+                                    OkHttpClient okHttpClient = new OkHttpClient();
+                                    okHttpClient.newCall(request).enqueue(new Callback() {
+                                        @Override
+                                        public void onFailure(Call call, IOException e) {
+
+                                        }
+
+                                        @Override
+                                        public void onResponse(Call call, Response response) throws IOException {
+
+                                        }
+                                    });
                                 }
                             }
 

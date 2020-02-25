@@ -49,7 +49,6 @@ public class RegisterActivity extends AppCompatActivity {
         mCurrentUser = mAuth.getCurrentUser();
 
         nickName = (EditText) findViewById(R.id.signUp_nick_editText);
-
         SetEditText();
 
         signUp_FinishButton = (Button) findViewById(R.id.signUp_FinishButton);
@@ -135,11 +134,21 @@ public class RegisterActivity extends AppCompatActivity {
         return;
     }
 
+//    private InputFilter inputFilter = new InputFilter() {
+//        @Override
+//        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+//            Pattern ps = Pattern.compile("^[a-zA-Z0-9ㄱ-ㅎ가-힣]*$");
+//            if (!ps.matcher(source).matches()) {
+//                return "";
+//            }
+//            return null;
+//        }
+//    };
     private void SetEditText() {
         nickName.setFilters(new InputFilter[]{new InputFilter() {
             @Override
             public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                Pattern ps = Pattern.compile("^[a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣ]");
+                Pattern ps = Pattern.compile("^[a-zA-Z0-9ㄱ-ㅎ가-힣]*$");
                 if (!ps.matcher(source).matches()) {
                     return "";
                 }

@@ -28,7 +28,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -115,13 +114,13 @@ public class LoginActivity extends AppCompatActivity {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     if(dataSnapshot.exists()) {
-                                            if (dataSnapshot.getValue(User.class).getUserNickname().equals("")) {
-                                                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
-                                                finish();
-                                            } else {
-                                                startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                                                finish();
-                                            }
+                                        if (dataSnapshot.getValue(User.class).getUserNickname().equals("")) {
+                                            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+                                            finish();
+                                        } else {
+                                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                            finish();
+                                        }
                                     } else {
                                         userRef.child(user.getUid()).setValue(user, new DatabaseReference.CompletionListener() {
                                             @Override
@@ -138,14 +137,14 @@ public class LoginActivity extends AppCompatActivity {
                                 public void onCancelled(@NonNull DatabaseError databaseError) {}
                             });
                         } else {
-                            Snackbar.make(login_main_layout, "로그인에 실패하였습니다.", Snackbar.LENGTH_LONG).show();
+                            Snackbar.make(login_main_layout, "로그인에 실패했습니다. 다시 시도해주세요.", Snackbar.LENGTH_LONG).show();
                         }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Snackbar.make(login_main_layout, "Failed Login", Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(login_main_layout, "로그인에 실패했습니다. 다시 시도해주세요.", Snackbar.LENGTH_LONG).show();
                     }
                 });
     }
@@ -170,8 +169,8 @@ public class LoginActivity extends AppCompatActivity {
     }
     private void ClickImageButton() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
-        builder.setMessage("# 어플내의 닉네임을 따로 설정하여 사용하기 때문에 " +
-                        "서로의 구글 계정 정보를 알 수 없습니다.")
+        builder.setMessage("# 닉네임을 따로 설정하여 사용하기 때문에 " +
+                "서로의 구글 계정 정보를 알 수 없습니다.")
                 .setPositiveButton("확인", null)
                 .setTitle("알림")
                 .show();

@@ -136,7 +136,7 @@
     </LinearLayout>
     <RelativeLayout
         android:id="@+id/afterArea"
-        android:visibility="gone"
+        android:visibility="visible"
         android:padding="10dp"
         android:layout_margin="2dp"
         android:layout_width="match_parent"
@@ -168,23 +168,23 @@
                 android:background="@drawable/custom_afterbutton"
                 android:visibility="visible"
                 android:id="@+id/afterYesButton"
-                android:layout_marginLeft="50dp"
+                android:layout_marginLeft="35dp"
                 android:text="수락"
                 android:textColor="#ffffff"
                 android:textStyle="bold"
                 android:layout_alignParentLeft="true"
-                android:layout_width="wrap_content"
+                android:layout_width="110dp"
                 android:layout_height="wrap_content"/>
             <Button
                 android:background="@drawable/custom_afterbutton"
                 android:visibility="visible"
                 android:id="@+id/afterNoButton"
-                android:layout_marginRight="50dp"
+                android:layout_marginRight="35dp"
                 android:text="거절"
                 android:textColor="#ffffff"
                 android:textStyle="bold"
                 android:layout_alignParentRight="true"
-                android:layout_width="wrap_content"
+                android:layout_width="110dp"
                 android:layout_height="wrap_content"/>
         </RelativeLayout>
         <TextView

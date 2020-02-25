@@ -8,7 +8,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -16,14 +15,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import com.devkproject.newchatproject.fragment.ChatFragment;
 import com.devkproject.newchatproject.fragment.FriendsFragment;
 import com.devkproject.newchatproject.fragment.RequestFragment;
 import com.devkproject.newchatproject.model.User;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
@@ -33,6 +35,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -50,22 +53,32 @@ public class MainActivity extends AppCompatActivity {
     private FriendsFragment friendFragment = new FriendsFragment();
     private ChatFragment chatFragment = new ChatFragment();
     private RequestFragment requestFragment = new RequestFragment();
+    private FrameLayout main_frameLayout;
 
     private FirebaseAuth mAuth;
     private FirebaseUser mCurrentUser;
     private DatabaseReference userRef;
     private DatabaseReference mChatMemberRef;
-    private DatabaseReference mChat;
     private GoogleSignInClient mGoogleSignInClient;
 
     private AdView adView;
-
+    private InterstitialAd mInterstitialAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                mInterstitialAd.loadAd(new AdRequest.Builder().build());
+                SendAddFriendActivity();
+            }
+        });
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override
             public void onInitializationComplete(InitializationStatus initializationStatus) {
@@ -76,11 +89,11 @@ public class MainActivity extends AppCompatActivity {
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
 
+        main_frameLayout = (FrameLayout) findViewById(R.id.main_frameLayout);
         mAuth = FirebaseAuth.getInstance();
         mCurrentUser = mAuth.getCurrentUser();
         userRef = FirebaseDatabase.getInstance().getReference("users");
         mChatMemberRef = FirebaseDatabase.getInstance().getReference("chat_members");
-        mChat = FirebaseDatabase.getInstance().getReference("chat_messages");
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -92,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar); // 툴바를 액티비티의 앱바로 지정
-        getSupportActionBar().setTitle(mAuth.getCurrentUser().getDisplayName() + "님 환영합니다");
+        getSupportActionBar().setTitle(mAuth.getCurrentUser().getDisplayName() + "님");
         toolbar.setTitleTextColor(Color.WHITE);
 
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -135,7 +148,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.toolbar_addFriend:
-                SendAddFriendActivity();
+                if(mInterstitialAd.isLoaded()) {
+                    mInterstitialAd.show();
+                }
                 return true;
             case R.id.toolbar_help:
                 toolbarHelp();
@@ -297,7 +312,14 @@ public class MainActivity extends AppCompatActivity {
                                                     });
                                                 } else {
                                                     Log.d(TAG, "회원 탈퇴 실패");
-                                                    Toast.makeText(MainActivity.this, "잠시 후 다시 시도해 주세요", Toast.LENGTH_SHORT).show();
+                                                    Snackbar.make(main_frameLayout, "로그아웃 -> 로그인 후 시도해주세요", 5000)
+                                                            .setActionTextColor(Color.YELLOW)
+                                                            .setAction("확인", new View.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(View v) {
+
+                                                                }
+                                                            }).show();
                                                 }
                                             }
                                         });
@@ -330,23 +352,25 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-    private void pushToken() {
 
+    private void pushToken() {
         FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
             @Override
             public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                if(!task.isSuccessful()) {
+                if(task.isSuccessful()) {
+                    String token = task.getResult().getToken();
+                    userRef.child(mCurrentUser.getUid()).child("deviceToken").setValue(token).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()) {
+                                Log.d(TAG, "토큰 생성 완료");
+                            }
+                        }
+                    });
+                } else {
                     return;
                 }
-                String token = task.getResult().getToken();
-                userRef.child(mCurrentUser.getUid()).child("deviceToken").setValue(token).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if(task.isSuccessful()) {
-                            Log.d(TAG, "토큰 생성 완료");
-                        }
-                    }
-                });
+
             }
         });
     }

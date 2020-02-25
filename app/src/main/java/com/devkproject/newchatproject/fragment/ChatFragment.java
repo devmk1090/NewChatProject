@@ -121,7 +121,8 @@ public class ChatFragment extends Fragment {
                     }
                     if (!updatedChat.getLastMessage().getMessageUser().getUid().equals(mCurrentUser.getUid())) {
                         if (!updatedChat.getChatID().equals(JOINED_ROOM)) {
-
+                            Intent chatIntent = new Intent (mContext, ChatActivity.class);
+                            chatIntent.putExtra("chat_id", updatedChat.getChatID());
                         }
                     }
                 }

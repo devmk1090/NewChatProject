@@ -1,6 +1,7 @@
 package com.devkproject.newchatproject;
 
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -42,26 +43,33 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void sendNotification(String title, String text) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        String channelId = "newChat";
+        String CHANNEL_ID = "BT";
+
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(this, channelId)
+                new NotificationCompat.Builder(this, CHANNEL_ID)
+                        .setDefaults(Notification.DEFAULT_ALL)
                         .setSmallIcon(R.drawable.icon_heart)
                         .setContentTitle(title)
                         .setContentText(text)
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
                         .setContentIntent(pendingIntent);
-
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(channelId,
-                    "nEWcHATpROJECT",
-                    NotificationManager.IMPORTANCE_DEFAULT);
+            String CHANNEL_NAME = "BlindTalk";
+            String CHANNEL_DESCRIPTION ="BT Description";
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription(CHANNEL_DESCRIPTION);
+            channel.enableLights(true);
+            channel.enableVibration(true);
+            channel.setVibrationPattern(new long[]{100, 200, 100, 200});
+            channel.setSound(defaultSoundUri, null);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+
             notificationManager.createNotificationChannel(channel);
         }
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
