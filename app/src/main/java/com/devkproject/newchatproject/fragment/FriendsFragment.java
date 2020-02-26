@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 
 public class FriendsFragment extends Fragment {
 
@@ -76,31 +74,8 @@ public class FriendsFragment extends Fragment {
                         .setPositiveButton("예", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-//                                mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
-//                                    @Override
-//                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                                        if(dataSnapshot.exists()) {
-//                                            for (DataSnapshot item : dataSnapshot.getChildren()) {
-//                                                User user = item.getValue(User.class);
-//                                                if(user.isContinueChat() == false) {
-//
-//                                                } else {
-//
-//                                                }
-//                                            }
-//                                        } else {
-//                                            return;
-//                                        }
-//                                    }
-//
-//                                    @Override
-//                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                                    }
-//                                });
                                 final Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
                                 chatIntent.putExtra("uid", friend.getUid());
-                                //  chatIntent.putExtra("chat_id",test);
                                 startActivityForResult(chatIntent, ChatFragment.JOIN_ROOM_REQUEST_CODE);
                             }
                         })
@@ -117,7 +92,6 @@ public class FriendsFragment extends Fragment {
         friendsRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                // User 모델과 friend 는 구조가 동일하기 때문에 User 모델로 가져온다
                 User friend = dataSnapshot.getValue(User.class);
                 if(friend.getRequestType().equals("accept")) {
                     friendsListAdapter.addItem(friend);

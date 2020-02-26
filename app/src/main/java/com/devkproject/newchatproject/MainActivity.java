@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.FrameLayout;
 
 import com.devkproject.newchatproject.fragment.ChatFragment;
@@ -35,7 +34,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -105,13 +103,14 @@ public class MainActivity extends AppCompatActivity {
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar); // 툴바를 액티비티의 앱바로 지정
-        getSupportActionBar().setTitle(mAuth.getCurrentUser().getDisplayName() + "님");
+        getSupportActionBar().setTitle("BLIND TALK   " + mAuth.getCurrentUser().getDisplayName());
         toolbar.setTitleTextColor(Color.WHITE);
 
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.main_frameLayout, friendFragment).commitAllowingStateLoss();
+        transaction.replace(R.id.main_frameLayout, chatFragment).commitAllowingStateLoss();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.main_bottom_navi);
+        bottomNavigationView.setSelectedItemId(R.id.navi_chat);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -138,10 +137,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_item, menu);
-        // 검색 툴바
-//        SearchView searchView = (SearchView) menu.findItem(R.id.toolbar_search).getActionView();
-//        searchView.setQueryHint("친구 추가 검색");
-//        searchView.setMaxWidth(Integer.MAX_VALUE);
         return true;
     }
     @Override
@@ -159,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                 SignOut();
                 return true;
             case R.id.toolbar_withdraw:
-                MemberWithdraw();
+                MemberWithDraw();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -177,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                         "\n\n" +
                         "# 친구 삭제 : 친구를 길게 터치하면 대화상자가 나타납니다." +
                         "\n\n" +
-                        "# 대화방 나가기 : 대화방을 길게 터치하면 대화상자가 나타납니다.")
+                        "# 채팅방 나가기 : 채팅방을 길게 터치하면 대화상자가 나타납니다.")
                 .setPositiveButton("확인", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -209,25 +204,19 @@ public class MainActivity extends AppCompatActivity {
         loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(loginIntent);
     }
+
     // [회원 탈퇴 로직]
-    // 1.나의 계정 삭제
-    // 2.users 의 나의 정보 삭제
-    // 3.chat_members 에서 chatID 를 얻어온다. 값이 없으면 finishAffinity 를 호출하여 종료.
-    // 3-1.chat_members 가 한명뿐이라면 chat_message 삭제
-    // 4.chat_members 에서 나를 삭제
-    // 5.상대방 친구 목록에서 나를 삭제
-    private void MemberWithdraw() {
+    // 1.나의 정보 삭제
+    // 2.chat_members 에서 나를 삭제
+    // 3.상대방 친구 목록에서 나를 삭제
+    private void MemberWithDraw() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
         builder.setTitle("회원 탈퇴 설명")
-                .setMessage("1.어플에 등록된 구글 계정 삭제" +
+                .setMessage("1.내 정보 삭제" +
                         "\n" +
-                        "2.데이터베이스에 있는 나의 정보 삭제" +
+                        "2.모든 채팅방에서 나가기" +
                         "\n" +
-                        "3.모든 대화방에서 나가기" +
-                        "\n" +
-                        "4.나의 친구목록 삭제" +
-                        "\n" +
-                        "5.상대방 친구목록에서 나를 삭제")
+                        "3.타인의 친구목록에서 나를 삭제")
                 .setPositiveButton("탈퇴", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -236,93 +225,7 @@ public class MainActivity extends AppCompatActivity {
                                 .setPositiveButton("예", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        mCurrentUser.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if(task.isSuccessful()) {
-
-                                                    userRef.child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
-                                                        @Override
-                                                        public void onComplete(@Nullable final DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-
-                                                            mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                @Override
-                                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                                    if(dataSnapshot.exists()) {
-                                                                        for (DataSnapshot item : dataSnapshot.getChildren()) {
-                                                                            final String key = item.getKey();
-
-                                                                            mChatMemberRef.child(key).child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
-                                                                                @Override
-                                                                                public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                                                                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                                        @Override
-                                                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                                                            for (DataSnapshot uid : dataSnapshot.getChildren()) {
-                                                                                                User user = uid.getValue(User.class);
-                                                                                                if (!mCurrentUser.getUid().equals(user.getUid())) {
-                                                                                                    userRef.child(user.getUid()).child("friends").child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
-                                                                                                        @Override
-                                                                                                        public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                                                                                                            finishAffinity();
-                                                                                                        }
-                                                                                                    });
-                                                                                                }
-                                                                                            }
-                                                                                        }
-
-                                                                                        @Override
-                                                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                                                        }
-                                                                                    });
-                                                                                }
-                                                                            });
-                                                                        }
-                                                                    } else {
-                                                                        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                            @Override
-                                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                                                for (DataSnapshot uid : dataSnapshot.getChildren()) {
-                                                                                    User user = uid.getValue(User.class);
-                                                                                    if (!mCurrentUser.getUid().equals(user.getUid())) {
-                                                                                        userRef.child(user.getUid()).child("friends").child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
-                                                                                            @Override
-                                                                                            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                                                                                                finishAffinity();
-                                                                                            }
-                                                                                        });
-                                                                                    }
-                                                                                }
-                                                                            }
-
-                                                                            @Override
-                                                                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                }
-                                                                @Override
-                                                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                                }
-                                                            });
-                                                        }
-                                                    });
-                                                } else {
-                                                    Log.d(TAG, "회원 탈퇴 실패");
-                                                    Snackbar.make(main_frameLayout, "로그아웃 -> 로그인 후 시도해주세요", 5000)
-                                                            .setActionTextColor(Color.YELLOW)
-                                                            .setAction("확인", new View.OnClickListener() {
-                                                                @Override
-                                                                public void onClick(View v) {
-
-                                                                }
-                                                            }).show();
-                                                }
-                                            }
-                                        });
+                                        WithDraw();
                                     }
                                 })
                                 .setNegativeButton("아니오", null)
@@ -330,8 +233,59 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).setNegativeButton("취소", null)
                 .show();
-
     }
+
+    private void WithDraw() {
+        userRef.child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+
+                mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.exists()) {
+                            for (DataSnapshot item : dataSnapshot.getChildren()) {
+                                final String key = item.getKey();
+
+                                mChatMemberRef.child(key).child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                        
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {}
+                });
+
+                userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.exists()) {
+                            for (DataSnapshot uid : dataSnapshot.getChildren()) {
+                                User user = uid.getValue(User.class);
+                                if (!mCurrentUser.getUid().equals(user.getUid())) {
+
+                                    userRef.child(user.getUid()).child("friends").child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
+                                        @Override
+                                        public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {}
+                });
+            }
+        });
+        finishAffinity();
+    }
+
     @Override
     public void onBackPressed() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
@@ -370,7 +324,6 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     return;
                 }
-
             }
         });
     }
@@ -378,12 +331,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        userRef.child(mCurrentUser.getUid()).child("status").setValue(false);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
         userRef.child(mCurrentUser.getUid()).child("status").setValue(false);
     }
 }

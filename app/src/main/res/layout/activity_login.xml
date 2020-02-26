@@ -41,30 +41,27 @@
         android:layout_height="wrap_content">
         <com.google.android.gms.common.SignInButton
             android:id="@+id/login_signUp_button"
-            android:layout_marginBottom="10dp"
-            android:layout_width="200dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <ImageButton
             android:id="@+id/login_image_button"
             android:src="@drawable/baseline_help_black_36dp"
             android:backgroundTint="#00FFFFFF"
-            android:layout_marginBottom="10dp"
             android:layout_marginLeft="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
-<!--    <LinearLayout-->
-<!--        android:background="#EF97FF"-->
-<!--        android:layout_weight="1"-->
-<!--        android:gravity="bottom"-->
-<!--        android:orientation="vertical"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content">-->
-<!--        <TextView-->
-<!--            android:layout_gravity="center"-->
-<!--            android:text="Version 1.0.0"-->
-<!--            android:layout_marginBottom="10dp"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"/>-->
-<!--    </LinearLayout>-->
+    <LinearLayout
+        android:background="#94FF95"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:textStyle="bold"
+            android:text="Version 1.0.0"
+            android:layout_marginBottom="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
 </LinearLayout>

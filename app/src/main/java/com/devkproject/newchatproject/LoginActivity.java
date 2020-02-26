@@ -33,8 +33,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -49,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DatabaseReference userRef;
 
-    // 로컬 캐시 기능 조심히 써야함.
+    // 로컬 캐시 기능 조심히 쓰자..
 //    static {
 //        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 //    }
@@ -67,7 +65,21 @@ public class LoginActivity extends AppCompatActivity {
         userRef = FirebaseDatabase.getInstance().getReference().child("users");
 
         if(mCurrentUser != null){
-            SendUserToMainActivity();
+            userRef.child(mCurrentUser.getUid()).child("userNickname").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.exists()) {
+                        if (dataSnapshot.getValue().equals("")) {
+                            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+                            finish();
+                        } else {
+                            SendUserToMainActivity();
+                        }
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {}
+            });
         }
 
         login_image_button.setOnClickListener(new View.OnClickListener() {
@@ -84,6 +96,8 @@ public class LoginActivity extends AppCompatActivity {
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
+        signInButton.setSize(SignInButton.SIZE_WIDE);
+        signInButton.setColorScheme(SignInButton.COLOR_DARK);
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,11 +124,11 @@ public class LoginActivity extends AppCompatActivity {
                             user.setAfterCount(true);
                             user.setUserNickname("");
 
-                            userRef.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            userRef.child(user.getUid()).child("userNickname").addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     if(dataSnapshot.exists()) {
-                                        if (dataSnapshot.getValue(User.class).getUserNickname().equals("")) {
+                                        if(dataSnapshot.getValue().equals("")) {
                                             startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
                                             finish();
                                         } else {
@@ -170,7 +184,7 @@ public class LoginActivity extends AppCompatActivity {
     private void ClickImageButton() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
         builder.setMessage("# 닉네임을 따로 설정하여 사용하기 때문에 " +
-                "서로의 구글 계정 정보를 알 수 없습니다.")
+                "타인의 구글 계정 정보를 알 수 없습니다.")
                 .setPositiveButton("확인", null)
                 .setTitle("알림")
                 .show();

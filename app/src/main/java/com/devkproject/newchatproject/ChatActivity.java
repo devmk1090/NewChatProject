@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -96,6 +97,7 @@ public class ChatActivity extends AppCompatActivity {
 
         setSupportActionBar(mToolbar);
         mToolbar.setTitleTextColor(Color.WHITE);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         if(mChatID != null) {
             mChatRef = mFirebaseDB.getReference("users").child(mCurrentUser.getUid()).child("chats").child(mChatID);
@@ -339,28 +341,6 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void onSendEvent(View v) {
-//        mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                if(dataSnapshot.exists()) {
-//                    for (DataSnapshot item : dataSnapshot.getChildren()) {
-//                        User user = item.getValue(User.class);
-//                        if(user.isContinueChat() == true) {
-//                            sendMessage();
-//                        } else {
-//                            createChat();
-//                        }
-//                    }
-//                } else {
-//                    return;
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
         if(mChatID != null) {
             mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -628,52 +608,6 @@ public class ChatActivity extends AppCompatActivity {
 
                             @Override
                             public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void sendFcm() {
-        mChatMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot item : dataSnapshot.getChildren()) {
-                    User user = item.getValue(User.class);
-                    if (!mCurrentUser.getUid().equals(user.getUid())) {
-                        String token = user.getDeviceToken();
-                        Gson gson = new Gson();
-                        final MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
-
-                        NotificationModel notificationModel = new NotificationModel();
-                        notificationModel.to = token;
-                        notificationModel.data.title = mCurrentUser.getDisplayName();
-                        notificationModel.data.text = "메시지가 도착했습니다";
-
-                        RequestBody body = RequestBody.create(mediaType, gson.toJson(notificationModel));
-                        Request request = new Request.Builder()
-                                .url("https://fcm.googleapis.com/fcm/send")
-                                .header("Content-Type", "application/json")
-                                .addHeader("Authorization", "key=AAAAW99exTw:APA91bFhQZjaCxnlkNrx4RgbP0YMbXyh-F-Va4y7mJp5lr8p17WVprO4gH53wF97aH_dYY_eK-m0qAC0s6dMYEjqnOghvaoqlq5kLnKacVliLNpvpGcDJ0CUbPfFEopRVErjt9UEZQdv")
-                                .post(body)
-                                .build();
-                        OkHttpClient okHttpClient = new OkHttpClient();
-                        okHttpClient.newCall(request).enqueue(new Callback() {
-                            @Override
-                            public void onFailure(Call call, IOException e) {
-
-                            }
-
-                            @Override
-                            public void onResponse(Call call, Response response) throws IOException {
 
                             }
                         });

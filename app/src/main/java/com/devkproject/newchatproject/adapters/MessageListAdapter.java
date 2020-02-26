@@ -128,8 +128,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.afterYesTxt.setVisibility(View.GONE);
                 if(item.getMessageUser().isAfterCount() == true) {
                     holder.afterYesTxt.setVisibility(View.VISIBLE);
-                    holder.afterYesTxt.setText("상대방이 애프터 신청을 수락하셨습니다\n" +
-                            "축하합니다 !");
+                    holder.afterYesTxt.setText("상대방이 애프터 신청을 수락하셨습니다 !!");
                 }
             }
             if(item.getUnreadCount() > 0) {
@@ -149,8 +148,6 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.exitArea.setVisibility(View.GONE);
                 holder.afterArea.setVisibility(View.GONE);
             }
-
-
         }
         else {
             // 상대방이 보낸 경우
@@ -163,7 +160,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 holder.rcvTxt.setText(textMessage.getMessageText());
                 holder.rcvTxt.setVisibility(View.VISIBLE);
             } else if (item.getMessageType() == Message.MessageType.EXIT) {
-                holder.exitTxt.setText(item.getMessageUser().getUserNickname() + "님이 방에서 나가셨습니다");
+                holder.exitTxt.setText(item.getMessageUser().getUserNickname() + "님이 나가셨습니다");
             } else if (item.getMessageType() == Message.MessageType.AFTER) {
                 holder.afterTxt.setText(item.getMessageUser().getUserNickname() + "님이 애프터 신청을 하셨습니다");
                 holder.afterTxt.setVisibility(View.VISIBLE);
@@ -207,41 +204,31 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                     public void onClick(final View v) {
                         // 애프터 버튼 거절시 로직
                         // 1. user -> chats 삭제(실시간으로 방없어짐)
-                        // 2. chat_messages 해당방의 메세지 모두 삭제
-                        // 3. 상대방 -> chats 삭제
-                        // 4. chat_members 삭제
-                        // 5. 나와 상대방 친구 등록 삭제
+                        // 2. chat_members 삭제
+                        // 3. 나와 상대방 친구 등록 삭제
                         AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), R.style.MyAlertDialogStyle);
                         builder.setTitle("애프터 거절")
-                                .setMessage("# 거절하면 해당 채팅방에서 나가지며\n친구등록이 즉시 삭제됩니다")
+                                .setMessage("# 거절하면 해당 채팅방과 친구등록이 삭제됩니다")
                                 .setPositiveButton("거절", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         ((ChatActivity)v.getContext()).finish();
+                                        //1
                                         userChatRef.child(item.getChatID()).removeValue(new DatabaseReference.CompletionListener() {
                                             @Override
                                             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                                                chatRef.child(item.getChatID()).removeValue(new DatabaseReference.CompletionListener() {
+                                                //2
+                                                mChatMemberRef.child(item.getChatID()).child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
                                                     @Override
                                                     public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                                                        userRef.child(item.getMessageUser().getUid()).child("chats").child(item.getChatID()).removeValue(new DatabaseReference.CompletionListener() {
+                                                        //3
+                                                        userRef.child(mCurrentUser.getUid()).child("friends").child(item.getMessageUser().getUid()).removeValue(new DatabaseReference.CompletionListener() {
                                                             @Override
                                                             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                                                                mChatMemberRef.child(item.getChatID()).removeValue(new DatabaseReference.CompletionListener() {
+                                                                userRef.child(item.getMessageUser().getUid()).child("friends").child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
                                                                     @Override
                                                                     public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                                                                        userRef.child(mCurrentUser.getUid()).child("friends").child(item.getMessageUser().getUid()).removeValue(new DatabaseReference.CompletionListener() {
 
-                                                                            @Override
-                                                                            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                                                                                userRef.child(item.getMessageUser().getUid()).child("friends").child(mCurrentUser.getUid()).removeValue(new DatabaseReference.CompletionListener() {
-                                                                                    @Override
-                                                                                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-
-                                                                                    }
-                                                                                });
-                                                                            }
-                                                                        });
                                                                     }
                                                                 });
                                                             }

@@ -25,7 +25,6 @@ import com.devkproject.newchatproject.customviews.RecyclerViewItemClickListener;
 import com.devkproject.newchatproject.model.Chat;
 import com.devkproject.newchatproject.model.ExitMessage;
 import com.devkproject.newchatproject.model.Message;
-import com.devkproject.newchatproject.model.NotificationModel;
 import com.devkproject.newchatproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,19 +34,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 
 public class ChatFragment extends Fragment {
@@ -144,53 +134,6 @@ public class ChatFragment extends Fragment {
         });
     }
 
-    private void sendFcm(Chat chat) {
-        mChatMemberRef.child(chat.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot item : dataSnapshot.getChildren()) {
-                    User user = item.getValue(User.class);
-                    if (!mCurrentUser.getUid().equals(user.getUid())) {
-                        String token = user.getDeviceToken();
-                        Log.d(TAG, token);
-                        Gson gson = new Gson();
-                        final MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
-
-                        NotificationModel notificationModel = new NotificationModel();
-                        notificationModel.to = token;
-                        notificationModel.data.title = mCurrentUser.getDisplayName();
-                        notificationModel.data.text = "메시지가 도착했습니다";
-
-                        RequestBody body = RequestBody.create(mediaType, gson.toJson(notificationModel));
-                        Request request = new Request.Builder()
-                                .url("https://fcm.googleapis.com/fcm/send")
-                                .header("Content-Type", "application/json")
-                                .addHeader("Authorization", "key=AAAAW99exTw:APA91bFhQZjaCxnlkNrx4RgbP0YMbXyh-F-Va4y7mJp5lr8p17WVprO4gH53wF97aH_dYY_eK-m0qAC0s6dMYEjqnOghvaoqlq5kLnKacVliLNpvpGcDJ0CUbPfFEopRVErjt9UEZQdv")
-                                .post(body)
-                                .build();
-                        OkHttpClient okHttpClient = new OkHttpClient();
-                        okHttpClient.newCall(request).enqueue(new Callback() {
-                            @Override
-                            public void onFailure(Call call, IOException e) {
-
-                            }
-
-                            @Override
-                            public void onResponse(Call call, Response response) throws IOException {
-
-                            }
-                        });
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
     private void drawUI(final DataSnapshot chatDataSnapshot, final DrawType drawType) {
 
         final Chat chatRoom = chatDataSnapshot.getValue(Chat.class);
@@ -252,12 +195,12 @@ public class ChatFragment extends Fragment {
     public void leaveChat(final Chat chat) {
         final DatabaseReference messageRef = mFirebaseDatabase.getReference("chat_messages").child(chat.getChatID());
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle);
-        builder.setMessage("선택된 대화방을 나가시겠습니까?")
+        builder.setMessage("선택된 채팅방을 나가시겠습니까?")
                 .setPositiveButton("예", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        // 대화방의 마지막 사람이 나가면 챗멤버 삭제
+                        // 대화방의 마지막 사람이 나가면 메시지 삭제
                         mChatMemberRef.child(chat.getChatID()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

@@ -90,7 +90,6 @@ public class RequestListAdapter extends RecyclerView.Adapter<RequestListAdapter.
                         });
                     }
                 });
-
             }
         });
         requestHolder.user_name.setText(friend.getUserNickname());

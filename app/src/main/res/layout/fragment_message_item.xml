@@ -134,9 +134,11 @@
             android:textSize="15dp"
             android:layout_height="wrap_content"/>
     </LinearLayout>
+
+    <!--    애프터 신청-->
     <RelativeLayout
         android:id="@+id/afterArea"
-        android:visibility="visible"
+        android:visibility="gone"
         android:padding="10dp"
         android:layout_margin="2dp"
         android:layout_width="match_parent"

@@ -72,7 +72,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             notificationManager.createNotificationChannel(channel);
         }
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        notificationManager.notify(0, notificationBuilder.build());
     }
 
     @Override
@@ -85,7 +85,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
        mAuth = FirebaseAuth.getInstance();
        mCurrentUser = mAuth.getCurrentUser();
        userRef = FirebaseDatabase.getInstance().getReference("users");
-
-       userRef.child(mCurrentUser.getUid()).child("deviceToken").setValue(token);
+       if(mCurrentUser != null) {
+           userRef.child(mCurrentUser.getUid()).child("deviceToken").setValue(token);
+       }
     }
 }

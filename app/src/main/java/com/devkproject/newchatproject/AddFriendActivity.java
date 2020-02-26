@@ -16,8 +16,6 @@ import android.widget.Toast;
 
 import com.devkproject.newchatproject.adapters.AddFriendListAdapter;
 import com.devkproject.newchatproject.model.User;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.InterstitialAd;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
