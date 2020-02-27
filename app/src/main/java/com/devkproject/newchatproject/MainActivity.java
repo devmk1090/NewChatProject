@@ -67,8 +67,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.setAdUnitId("ca-app-pub-1646409874287424/8670480053");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
@@ -107,10 +108,9 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
 
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.main_frameLayout, chatFragment).commitAllowingStateLoss();
+        transaction.replace(R.id.main_frameLayout, friendFragment).commitAllowingStateLoss();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.main_bottom_navi);
-        bottomNavigationView.setSelectedItemId(R.id.navi_chat);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -139,12 +139,15 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.toolbar_item, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.toolbar_addFriend:
                 if(mInterstitialAd.isLoaded()) {
                     mInterstitialAd.show();
+                } else {
+                    SendAddFriendActivity();
                 }
                 return true;
             case R.id.toolbar_help:
@@ -199,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton("아니오", null)
                 .show();
     }
+
     private void SendUserToLoginActivity() {
         Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
         loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -211,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
     // 3.상대방 친구 목록에서 나를 삭제
     private void MemberWithDraw() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
-        builder.setTitle("회원 탈퇴 설명")
+        builder.setTitle("회원 탈퇴")
                 .setMessage("1.내 정보 삭제" +
                         "\n" +
                         "2.모든 채팅방에서 나가기" +
@@ -226,6 +230,7 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         WithDraw();
+                                        finishAffinity();
                                     }
                                 })
                                 .setNegativeButton("아니오", null)
@@ -283,7 +288,6 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
-        finishAffinity();
     }
 
     @Override

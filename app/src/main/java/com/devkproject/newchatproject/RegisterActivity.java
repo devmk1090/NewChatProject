@@ -178,15 +178,4 @@ public class RegisterActivity extends AppCompatActivity {
         }});
         nickName.setFilters(new InputFilter[]{new InputFilter.LengthFilter(8)});
     }
-
-    //    private InputFilter inputFilter = new InputFilter() {
-//        @Override
-//        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-//            Pattern ps = Pattern.compile("^[a-zA-Z0-9ㄱ-ㅎ가-힣]*$");
-//            if (!ps.matcher(source).matches()) {
-//                return "";
-//            }
-//            return null;
-//        }
-//    };
 }
