@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar); // 툴바를 액티비티의 앱바로 지정
-        getSupportActionBar().setTitle("BLIND TALK   " + mAuth.getCurrentUser().getDisplayName());
+        getSupportActionBar().setTitle("닉네임 : " + mAuth.getCurrentUser().getDisplayName());
         toolbar.setTitleTextColor(Color.WHITE);
 
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -169,9 +169,9 @@ public class MainActivity extends AppCompatActivity {
     private void toolbarHelp() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
         builder.setTitle("도움말")
-                .setMessage("# 친구 신청 : 상단 오른쪽의 사람 아이콘을 클릭하고 상대방의 닉네임을 검색 후 친구신청 아이콘 클릭" +
+                .setMessage("# 친구 신청 : 상단 오른쪽의 사람 아이콘을 터치하고 상대방의 닉네임을 검색 후 친구신청 아이콘 터치" +
                         "\n\n" +
-                        "# 친구 추가 : 상대방이 친구 신청을 했다면 '요청' 탭에서 수락 클릭" +
+                        "# 친구 추가 : 상대방이 친구 신청을 했다면 '요청' 탭에서 수락 터치" +
                         "\n\n" +
                         "# 친구 삭제 : 친구를 길게 터치하면 대화상자가 나타납니다." +
                         "\n\n" +
@@ -217,9 +217,9 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
         builder.setTitle("회원 탈퇴")
                 .setMessage("1.내 정보 삭제" +
-                        "\n" +
+                        "\n\n" +
                         "2.모든 채팅방에서 나가기" +
-                        "\n" +
+                        "\n\n" +
                         "3.타인의 친구목록에서 나를 삭제")
                 .setPositiveButton("탈퇴", new DialogInterface.OnClickListener() {
                     @Override
